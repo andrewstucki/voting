@@ -1,0 +1,45 @@
+{
+  "name": "voting",
+  "version": "1.0.0",
+  "description": "voting app",
+  "main": "server/index.js",
+  "scripts": {
+    "build": "grunt",
+    "start": "node server/index.js",
+    "test": "mocha",
+    "deploy": "git push heroku master"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andrewstucki/voting.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/andrewstucki/voting/issues"
+  },
+  "homepage": "https://github.com/andrewstucki/voting#readme",
+  "dependencies": {
+    "bcrypt": "^0.8.5",
+    "body-parser": "^1.14.2",
+    "dotenv": "^1.2.0",
+    "express": "^4.13.3",
+    "hat": "0.0.3",
+    "kerberos": "0.0.17",
+    "mandrill-api": "^1.0.45",
+    "mongoose": "^4.3.5",
+    "promise": "^7.1.1",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "bower": "^1.7.2",
+    "grunt": "^0.4.5",
+    "grunt-browserify": "^4.0.1",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-copy": "^0.8.2",
+    "grunt-contrib-jshint": "^0.11.3",
+    "grunt-contrib-less": "^1.1.0",
+    "mocha": "^2.3.4"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "voting",
+  "description": "voting app",
+  "main": "server/index.js",
+  "authors": [
+    "Andrew Stucki <andrew.stucki@govdelivery.com>"
+  ],
+  "license": "MIT",
+  "moduleType": [],
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "react": "~0.14.6",
+    "flux": "~2.1.1",
+    "bootstrap": "~3.3.6",
+    "font-awesome": "fontawesome#~4.5.0"
+  }
+}
