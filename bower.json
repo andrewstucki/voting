@@ -17,8 +17,6 @@
     "tests"
   ],
   "dependencies": {
-    "react": "~0.14.6",
-    "flux": "~2.1.1",
     "bootstrap": "~3.3.6",
     "font-awesome": "fontawesome#~4.5.0"
   }

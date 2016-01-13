@@ -85,6 +85,8 @@
             <p>Free integrated facebook or traditional comments allow your poll voters to provide immediate feedback and discuss results. Social share buttons encourage your poll voters to help spread the word.</p>
           </div>
         </div>
+        <div class="col-lg-12" id="app">
+        </div>
         <div class="col-lg-12 signup-form">
           <form id="signup" name="signup">
             <div class="form-group">
@@ -211,9 +213,8 @@
           url: "/signup",
           data: JSON.stringify(data),
           contentType: "application/json",
-          success: function(user){
-            console.log(user);
-            alert("Success!");
+          success: function(response){
+            alert(response.message);
           }
         }).fail(function(err) {
             console.log(err);
@@ -261,6 +262,33 @@
           alert("Error logging out!");
         });
       });
+
+      $.getJSON("/users").then(function(users) {
+        console.log(users);
+        users.forEach(function(user) {
+          $.getJSON("/users/" + user.id, function(user){
+            console.log(user);
+          }).fail(function(err) {
+            console.log(err);
+          });
+        });
+      }).fail(function(err) {
+        console.log(err);
+      });
+
+      $.getJSON("/polls").then(function(polls) {
+        console.log(polls);
+        polls.forEach(function(poll) {
+          $.getJSON("/polls/" + poll.id, function(poll){
+            console.log(poll);
+          }).fail(function(err) {
+            console.log(err);
+          });
+        });
+      }).fail(function(err) {
+        console.log(err);
+      });
+
     </script>
   </body>
 </html>

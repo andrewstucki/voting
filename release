@@ -1,0 +1,30 @@
+#!/bin/bash
+
+IFS='\'
+FILES=()
+while read -r line; do
+  FILES+=($line)
+done  <<< $( { git diff --name-only ; git diff --name-only --staged ; git ls-files --other --exclude-standard ; } | sort | uniq );
+
+if [ ${#FILES[@]} -gt 0 ]; then
+  >&2 echo "Unable to release code, you do not have a clean working tree. Stash or commit your changes before continuing."
+  exit 1
+fi
+
+rm -rf public
+
+grunt bump
+git add package.json
+REVISION=v$(cat package.json | awk -v RS=',"' -F: '/"version"/ {print $2}' | sed -e 's/[ "]//g')
+git commit -m "Release ${REVISION}"
+
+git branch -D release-build
+git checkout -b release-build
+grunt release
+git add public -f
+git commit -m "${REVISION} Assets"
+git tag $REVISION -m "Tagging ${REVISION}"
+git tag -fa release -m "Release tag -> ${REVISION}"
+# git push heroku release:master
+git checkout master
+git branch -D release-build

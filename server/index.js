@@ -2,9 +2,11 @@ require('dotenv').load();
 
 var express = require('express');
 var bodyParser = require('body-parser');
+var _ = require('underscore');
 
 var models = require('./models');
 var config = require('./config');
+var middleware = require('./middleware');
 
 var app = express();
 var jsonParser = bodyParser.json();
@@ -20,9 +22,7 @@ app.post("/session", jsonParser, function(req, res) {
     error: "Invalid credentials"
   });
   models.User.login(req.body.email, req.body.password).then(function(user) {
-    return res.status(201).json({
-      token: user.sessionToken
-    });
+    return res.status(201).json(user.renderToken());
   }).catch(function(err) {
     console.log(err);
     return res.status(401).json({
@@ -31,17 +31,41 @@ app.post("/session", jsonParser, function(req, res) {
   });
 });
 
-app.delete("/session", function(req, res) {
-  var token = req.get("x-voting-session");
-  if (!token) return res.status(422).json({
-    error: "Missing session token"
-  });
-  models.User.logout(token).then(function(user) {
+app.delete("/session", middleware.authenticate, function(req, res) {
+  req.user.logout().then(function(user) {
     return res.status(204).send("");
   }).catch(function(err) {
-    console.log(err);
     return res.status(400).json({
       error: "Unable to clear session"
+    });
+  });
+});
+
+app.get("/profile", middleware.authenticate, function(req, res) {
+  return res.status(200).json(req.user.renderJson());
+});
+
+app.get("/users", function(req, res) {
+  models.User.find({}).then(function(users) {
+    return res.status(200).json(_.map(users, function(user) {
+      return user.renderJson();
+    }));
+  }).catch(function(err) {
+    return res.status(500).json({
+      error: "Database error"
+    });
+  });
+});
+
+app.get("/users/:id", function(req, res) {
+  models.User.findById(req.params.id).then(function(user) {
+    if (!user) return res.status(404).json({
+      error: "Not found"
+    });
+    return res.status(200).json(user.renderJson());
+  }).catch(function(err) {
+    return res.status(500).json({
+      error: "Database error"
     });
   });
 });
@@ -56,6 +80,19 @@ app.get("/confirm/:token", function(req, res) {
   });
 });
 
+app.post("/confirm/resend", middleware.authenticate, function(req, res) {
+  req.user.sendConfirmation().then(function() {
+    return res.status(204).json({
+      message: "Confirmation message sent to: " + req.user.email
+    });
+  }).catch(function(err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "We were unable to send you another confirmation email at this time"
+    });
+  });
+});
+
 app.post("/signup", jsonParser, function(req, res) {
   console.log(req.get('Content-Type'));
   if (!req.body) return res.status(422).json({
@@ -65,7 +102,7 @@ app.post("/signup", jsonParser, function(req, res) {
   models.User.signup(req.body.email, req.body.password, req.body.password_confirmation)
     .then(function(user) {
       return res.status(201).json({
-        email: user.email
+        message: "Confirmation message sent to: " + user.email
       });
     }).catch(function(err) {
       console.log(err);
@@ -75,20 +112,112 @@ app.post("/signup", jsonParser, function(req, res) {
     });
 });
 
-// poll creation
-app.get("/voting", function(req, res) {
-  res.send(200, "hello world!");
-  // models.Search.find({}, function(err, searches) {
-  //   if (err) res.status(500).json({
-  //     error: "Sorry, something went wrong"
-  //   });
-  //   else res.json(searches.map(function(search) {
-  //     return {
-  //       term: search.term,
-  //       when: search.when
-  //     };
-  //   }));
-  // });
+// admin
+app.post('/admin/polls', jsonParser, middleware.authenticate, function(req, res) {
+  req.user.createPoll(req.body).then(function(poll) {
+    return res.status(201).json(poll.renderJson(true));
+  }).catch(function(err) {
+    // more logic here to separate out validation v server errors
+    return res.status(500).json({
+      err: err.toString()
+    });
+  });
+});
+
+app.get('/admin/polls', middleware.authenticate, function(req, res) {
+  req.user.getPolls().then(function(polls) {
+    return res.status(200).json(_.map(polls, function(poll) {
+      return poll.renderJson(true);
+    }));
+  }).catch(function(err) {
+    return res.status(500).json({
+      err: err.toString()
+    });
+  });
+});
+
+app.get('/admin/polls/:id', middleware.authenticate, function(req, res) {
+  req.user.getPoll(req.params.id).then(function(poll) {
+    return res.status(200).json(poll.renderJson(true));
+  }).catch(function(err) {
+    return res.status(500).json({
+      err: err.toString()
+    });
+  });
+});
+
+app.patch('/admin/polls/:id', jsonParser, middleware.authenticate, function(req,
+  res) {
+  req.user.updatePoll(req.params.id, req.body).then(function(poll) {
+    return res.status(204).json(poll.renderJson(true));
+  }).catch(function(err) {
+    // more logic here to separate out validation v server errors
+    return res.status(500).json({
+      err: err.toString()
+    });
+  });
+});
+
+app.delete('/admin/polls/:id', middleware.authenticate, function(req,
+  res) {
+  req.user.deletePoll(req.params.id).then(function(poll) {
+    return res.status(204).send("");
+  }).catch(function(err) {
+    return res.status(500).json({
+      err: err.toString()
+    });
+  });
+});
+
+// polls
+app.get('/polls', function(req, res) {
+  models.Poll.published().then(function(polls) {
+    return res.status(200).json(_.map(polls, function(poll) {
+      poll.renderJson();
+    }));
+  }).catch(function(err) {
+    return res.status(500).json({
+      err: err.toString()
+    });
+  });
+});
+
+app.get('/polls/:id', function(req, res) {
+  models.Poll.findOne({
+    _id: req.params.id
+  }).populate('_user').then(function(poll) {
+    if (!poll) return res.status(404).json({
+      error: "Not found"
+    });
+    return res.status(200).json(poll.renderJson());
+  }).catch(function(err) {
+    return res.status(500).json({
+      err: err.toString()
+    });
+  });
+});
+
+app.post('/polls/:id/vote', jsonParser, function(req, res) {
+  models.Poll.find({
+    _id: req.params.id
+  }).then(function(poll) {
+    if (!poll) return res.status(404).json({
+      error: "Not found"
+    });
+    return poll.vote(req.body).then(function(poll) {
+      return res.status(201).json({
+        message: "Thank you for voting"
+      });
+    }).catch(function(err) {
+      return res.status(422).json({
+        error: err.toString()
+      });
+    });
+  }).catch(function(err) {
+    return res.status(500).json({
+      err: err.toString()
+    });
+  });
 });
 
 module.exports = app.listen(port, function() {
