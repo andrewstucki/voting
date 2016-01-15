@@ -9,6 +9,7 @@ var handlebars = require('handlebars');
 var _ = require('underscore');
 
 var config = require("./config");
+var errors = require("./errors");
 
 if (!process.env.MANDRILL_APIKEY) throw new Error("Mandrill API key required!");
 
@@ -60,14 +61,13 @@ var userSchema = new mongoose.Schema({
   sessionToken: String
 });
 
-userSchema.statics.signup = function(email, password, passwordConfirmation,
-  skipEmail) {
+userSchema.statics.signup = function(email, password, passwordConfirmation, skipEmail) {
   var schema = this;
   return new promise(function(resolve, reject) {
     if (password !== passwordConfirmation)
-      return reject("Password confirmation does not match");
+      return reject(new errors.ModelInvalid("Password confirmation does not match"));;
     if (!validator.isEmail(email))
-      return reject("Email address is invalid");
+      return reject(new errors.ModelInvalid("Invalid Email Address"));
     var params = {
       email: email,
       password: password,
@@ -75,12 +75,11 @@ userSchema.statics.signup = function(email, password, passwordConfirmation,
     };
     var user = new schema(params);
     user.save().then(function(user) {
-      if (!skipEmail) user.sendConfirmation().then(resolve);
+      if (!skipEmail) return user.sendConfirmation().then(resolve);
       return resolve(user);
     }).catch(function(err) {
-      if (err.code === 11000) return reject(
-        "Email address already taken");
-      return reject(err.toString());
+      if (err.code === 11000) return reject(new errors.ModelInvalid("Email Address Already Taken"));
+      return reject(new errors.DatabaseFailure(err.toString()));
     });
   });
 };
@@ -92,10 +91,13 @@ userSchema.statics.confirm = function(token) {
       confirmationToken: token,
       confirmed: false
     }).then(function(user) {
-      if (!user) return reject("Unable to find matching token");
+      if (!user) return reject(new errors.NotFound("Token not found"));
       user.confirmed = true;
       user.confirmationToken = undefined;
-      return user.save();
+      return user.save().then(resolve).catch(function(err){
+        if (err.code === 11000) return reject(new errors.ModelInvalid("Invalid User"));
+        return reject(new errors.DatabaseFailure(err.toString()));
+      });
     }).then(function(user) {
       resolve(user);
     });
@@ -108,20 +110,18 @@ userSchema.statics.login = function(email, password) {
     schema.findOne({
       email: email
     }).then(function(user) {
-      if (!user) return reject(
-        "Unable to find user with matching email address");
+      if (!user) return reject(new errors.NotFound("Unable to find user with matching email address"));
       bcrypt.compare(password, user.password, function(err, match) {
-        if (err) return reject(err);
-        if (!match) return reject("Password mismatch");
+        if (err) return reject(new Error("Bcrypt error: " + err.toString()));
+        if (!match) return reject(new errors.ModelInvalid("Password Mismatch"));
         user.sessionToken = hat();
-        user.save().then(function(user) {
-          resolve(user);
-        }).catch(function(err) {
-          reject(err);
+        user.save().then(resolve).catch(function(err) {
+          if (err.code === 11000) return reject(new errors.ModelInvalid("Invalid User"));
+          reject(new errors.DatabaseFailure(err.toString()));
         });
       });
     }).catch(function(err) {
-      reject(err);
+      reject(new errors.DatabaseFailure(err.toString()));
     });
   });
 };
@@ -153,17 +153,15 @@ userSchema.methods.sendConfirmation = function() {
   var confirmationLink = "http://localhost:3000/confirm/" + user.confirmationToken;
 
   return new promise(function(resolve, reject) {
-    if (user.confirmed) return reject("User email already confirmed");
+    if (user.confirmed) return reject(new errors.ModelInvalid("User email already confirmed"));
     mailer.messages.send({
       message: user.generateEmail(
         "Confirm your Voting App email address!", "confirm", {
           confirmationLink: confirmationLink
         }),
       async: false
-    }, function(result) {
-      return resolve(result);
-    }, function(err) {
-      return reject(err);
+    }, resolve, function(err) {
+      reject(new errors.ApiClientFailure(err.toString()));
     });
   });
 };
@@ -180,7 +178,12 @@ userSchema.methods.createPoll = function(data) {
       value: option
     }));
   });
-  return poll.save().populate('_user');
+  return new promise(function(resolve, reject){
+    return poll.save().populate('_user').then(resolve).catch(function(err){
+      if (err.code === 11000) return reject(new errors.ModelInvalid("Invalid Poll"));
+      return reject(new errors.DatabaseFailure(err.toString()));
+    });
+  });
 };
 
 userSchema.methods.getPolls = function() {
@@ -188,10 +191,8 @@ userSchema.methods.getPolls = function() {
   return new promise(function(resolve, reject) {
     Poll.find({
       _user: user._id
-    }).populate('_user').then(function(polls) {
-      return resolve(polls);
-    }).catch(function(err) {
-      return reject("Database error");
+    }).populate('_user').then(resolve).catch(function(err) {
+      return reject(new errors.DatabaseFailure(err.toString()));
     });
   });
 };
@@ -203,10 +204,10 @@ userSchema.methods.getPoll = function(id) {
       _user: user._id,
       _id: id
     }).populate('_user').then(function(poll) {
-      if (!poll) return reject("Poll not found!");
+      if (!poll) return reject(new errors.NotFound("Poll not found"));
       return resolve(poll);
     }).catch(function(err) {
-      return reject("Database error");
+      return reject(new errors.DatabaseFailure(err.toString()));
     });
   });
 };
@@ -218,26 +219,24 @@ userSchema.methods.updatePoll = function(id, data) {
       _user: user._id,
       _id: id
     }).populate('_user').then(function(poll) {
-      if (!poll) return reject("Poll not found!");
+      if (!poll) return reject(new errors.NotFound("Poll not found"));
       if (data.name) poll.name = data.name;
       if (data.hasOwnProperty('allowOther')) poll.allowOther = data.allowOther;
       if (data.hasOwnProperty('published')) poll.published = data.published;
       _.each(data.options || [], function(option) {
-        var updateOption = _.find(poll.options, function(
-          pollOption) {
+        var updateOption = _.find(poll.options, function(pollOption) {
           return pollOption.value === option.value;
         });
         if (!updateOption) return;
         if (option.hasOwnProperty('published'))
           updateOption.published = option.published;
       });
-      return poll.save().then(function(poll) {
-        return resolve(poll);
-      }).catch(function(err) {
-        return reject(err);
+      return poll.save().then(resolve).catch(function(err) {
+        if (err.code === 11000) return reject(new errors.ModelInvalid("Invalid Poll"));
+        return reject(new errors.DatabaseFailure(err.toString()));
       });
     }).catch(function(err) {
-      return reject("Database error");
+      return reject(new errors.DatabaseFailure(err.toString()));
     });
   });
 };
@@ -249,10 +248,10 @@ userSchema.methods.deletePoll = function(id) {
       _user: user._id,
       _id: id
     }).then(function(poll) {
-      if (!poll) return reject("Poll not found!");
+      if (!poll) return reject(new errors.NotFound("Poll not found"));
       return resolve(poll);
     }).catch(function(err) {
-      return reject("Database error");
+      return reject(new errors.DatabaseFailure(err.toString()));
     });
   });
 };
@@ -342,9 +341,14 @@ var pollSchema = new mongoose.Schema({
 });
 
 pollSchema.statics.published = function() {
-  return this.find({
-    published: true
-  }).populate('_user');
+  var schema = this;
+  return new promise(function(resolve, reject){
+    schema.find({
+      published: true
+    }).populate('_user').then(resolve).catch(function(err){
+      return reject(new errors.DatabaseFailure(err.toString()));
+    });
+  });
 };
 
 pollSchema.methods.vote = function(response) {
@@ -360,12 +364,11 @@ pollSchema.methods.vote = function(response) {
         value: response.value
       });
       poll.options.push(option);
-    } else if (!option) return reject("Invalid option");
+    } else if (!option) return reject(new errors.ModelInvalid("Invalid Option"));
     option.count++;
-    poll.save().then(function() {
-      return resolve(option);
-    }).catch(function(err) {
-      return reject(err);
+    poll.save().then(resolve).catch(function(err) {
+      if (err.code === 11000) return reject(new errors.ModelInvalid("Invalid Poll"));
+      return reject(new errors.DatabaseFailure(err.toString()));
     });
   });
 };
@@ -389,26 +392,6 @@ pollSchema.methods.renderJson = function(admin) {
 
 var Option = mongoose.model('Option', optionSchema);
 var Poll = mongoose.model('Poll', pollSchema);
-
-// User.update(
-//     {emp_no: req.body.emp_no, 'skills._id': 123},
-//     {'$set': {
-//         'skills.$.startDate': req.body.startDate
-//     }},
-//     function(err, numAffected) {...}
-// );
-//
-// {
-// "_id" : ObjectId("5469753de27a7c082203fd0a"),
-// "emp_no" : 123,
-// "skills" : [
-//     {
-//         "skill" : ObjectId("547d5f3021d99d302079446d"),
-//         "startDate" : ISODate("2014-12-02T06:43:27.763Z")
-//         "_id" : ObjectId("547d5f8f21d99d3020794472")
-//     }
-// ],
-// "__v" : 108
 
 module.exports = {
   User: User,

@@ -4,11 +4,8 @@
   "description": "voting app",
   "main": "server/index.js",
   "scripts": {
-    "build": "grunt",
     "start": "node server/index.js",
-    "test": "mocha",
-    "release": "./release",
-    "deploy": "git push heroku release:master"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -41,7 +38,6 @@
     "babelify": "^7.2.0",
     "bower": "^1.7.2",
     "envify": "^3.4.0",
-    "flux": "^2.1.1",
     "grunt": "^0.4.5",
     "grunt-browserify": "^4.0.1",
     "grunt-bump": "^0.7.0",
@@ -54,7 +50,11 @@
     "history": "^1.17.0",
     "mocha": "^2.3.4",
     "react": "^0.14.6",
+    "react-addons-test-utils": "^0.14.6",
     "react-pure-render": "^1.0.2",
-    "react-router": "^1.0.3"
+    "react-redux": "^4.0.6",
+    "react-router": "^1.0.3",
+    "redux": "^3.0.5",
+    "redux-devtools": "^3.0.1"
   }
 }
