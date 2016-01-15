@@ -8,7 +8,7 @@ function loadData(props) {
   props.loadUsers()
 }
 
-class HelloPage extends Component {
+class UsersPage extends Component {
   constructor(props) {
     super(props)
     this.renderUser = this.renderUser.bind(this)
@@ -38,8 +38,8 @@ class HelloPage extends Component {
   }
 }
 
-HelloPage.propTypes = {
-  users: PropTypes.object.isRequired,
+UsersPage.propTypes = {
+  users: PropTypes.array.isRequired,
   usersPagination: PropTypes.object.isRequired,
   loadUsers: PropTypes.func.isRequired
 }
@@ -57,4 +57,4 @@ function mapStateToProps(state) {
 
 export default connect(mapStateToProps, {
   loadUsers
-})(HelloPage)
+})(UsersPage)

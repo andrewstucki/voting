@@ -8,9 +8,7 @@ export default class User extends Component {
     return (
       <div className="User">
         <Link to={`/users/${id}`}>
-          <h3>
-            {email}
-          </h3>
+          {email}
         </Link>
       </div>
     )
