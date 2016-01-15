@@ -76,26 +76,15 @@ class App extends Component {
             </div>
             <div className="navbar-collapse collapse" id="navbar-main">
               <ul className="nav navbar-nav">
-                <li>
-                  <Link activeClassName='active' to='/'>Home</Link>
-                </li>
-                <li>
-                  <Link activeClassName='active' to='users'>Users</Link>
-                </li>
-                <li>
-                  <Link activeClassName='active' to='polls'>Polls</Link>
-                </li>
+                <NavLink to='users'>Users</NavLink>
+                <NavLink to='polls'>Polls</NavLink>
                 <li>
                   <a href="#">Admin</a>
                 </li>
               </ul>
               <ul className="nav navbar-nav navbar-right">
-                <li>
-                  <Link activeClassName='active' to='signup'>Sign Up</Link>
-                </li>
-                <li>
-                  <Link activeClassName='active'  to='login'>Log In</Link>
-                </li>
+                <NavLink to='polls'>Sign Up</NavLink>
+                <NavLink to='login'>Log In</NavLink>
                 <li className="hide">
                   <p className="navbar-text">Hello</p>
                 </li>
