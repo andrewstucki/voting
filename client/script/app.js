@@ -1,12 +1,14 @@
-import React from 'react';
-import ReactDOM from 'react';
-// import { Dispatcher } from 'flux';
-import { createHistory } from 'history';
-import Root from './root';
+// Based off: https://github.com/rackt/redux/blob/master/examples/real-world/index.js
 
-const history = createHistory();
-const application = document.getElementById('app');
+import 'babel-polyfill'
+import React from 'react'
+import { render } from 'react-dom'
+import Root from './containers/root'
+import configureStore from './store/configureStore'
 
-ReactDOM.render(<Root history={history} />, application);
+const store = configureStore()
 
-if (process.env.NODE_ENV !== "production") console.log("test");
+render(
+  <Root store={store} />,
+  document.getElementById('app')
+)

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Voting Application</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="assets/styles/app.css" rel="stylesheet">
+    <link href="/assets/styles/app.css" rel="stylesheet">
   </head>
   <body>
     <div class="navbar navbar-default navbar-static-top">
@@ -197,98 +197,6 @@
         <p>Andrew Stucki</p>
       </div>
     </footer>
-    <script src="assets/scripts/app.js"></script>
-    <script>
-      var session;
-      $("#signup").submit(function(e){
-        e.preventDefault();
-        var data = {};
-        $.each(this.elements, function(i, v){
-          var input = $(v);
-          data[input.attr("name")] = input.val();
-          delete data["undefined"];
-        });
-        $.ajax({
-          type: "POST",
-          url: "/signup",
-          data: JSON.stringify(data),
-          contentType: "application/json",
-          success: function(response){
-            alert(response.message);
-          }
-        }).fail(function(err) {
-            console.log(err);
-            alert("Error!");
-          });
-      });
-
-      $("#login").submit(function(e){
-        e.preventDefault();
-        var data = {};
-        $.each(this.elements, function(i, v){
-          var input = $(v);
-          data[input.attr("name")] = input.val();
-          delete data["undefined"];
-        });
-        $.ajax({
-          type: "POST",
-          url: "/session",
-          data: JSON.stringify(data),
-          contentType: "application/json",
-          success: function(response){
-            console.log(response);
-            session = response;
-            alert("Success!");
-          }
-        }).fail(function(err) {
-            console.log(err);
-            alert("Error!");
-          });
-      });
-
-      $("#logout").click(function() {
-        if (!session) return;
-        $.ajax({
-          type: "DELETE",
-          url: "/session",
-          headers: {
-            "X-Voting-Session": session.token
-          },
-          success: function() {
-            alert("Logged out!");
-          }
-        }).fail(function(err) {
-          console.log(err);
-          alert("Error logging out!");
-        });
-      });
-
-      $.getJSON("/users").then(function(users) {
-        console.log(users);
-        users.forEach(function(user) {
-          $.getJSON("/users/" + user.id, function(user){
-            console.log(user);
-          }).fail(function(err) {
-            console.log(err);
-          });
-        });
-      }).fail(function(err) {
-        console.log(err);
-      });
-
-      $.getJSON("/polls").then(function(polls) {
-        console.log(polls);
-        polls.forEach(function(poll) {
-          $.getJSON("/polls/" + poll.id, function(poll){
-            console.log(poll);
-          }).fail(function(err) {
-            console.log(err);
-          });
-        });
-      }).fail(function(err) {
-        console.log(err);
-      });
-
-    </script>
+    <script src="/assets/scripts/app.js"></script>
   </body>
 </html>

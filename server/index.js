@@ -3,6 +3,7 @@ require('dotenv').load();
 var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('underscore');
+var path = require('path');
 
 var models = require('./models');
 var config = require('./config');
@@ -14,6 +15,12 @@ var jsonParser = bodyParser.json();
 var port = process.env.PORT || config.port;
 
 app.use(express.static('public'));
+app.get(/^\/(users|login|signup|polls|admin).*/, function(req, res) {
+  res.sendFile(path.resolve(__dirname + '/../public/index.html'));
+});
+
+var router  = express.Router();
+app.use('/api/v1', router);
 
 // application core
 
@@ -54,24 +61,24 @@ var handleError = function(res, err) {
 };
 
 // user creation and authentication
-app.post("/session", jsonParser, function(req, res) {
+router.post("/session", jsonParser, function(req, res) {
   if (!req.body) return unauthorized(res);
   models.User.login(req.body.email, req.body.password).then(function(user) {
     return res.status(201).json(user.renderToken());
   }).catch(handleError);
 });
 
-app.delete("/session", middleware.authenticate, function(req, res) {
+router.delete("/session", middleware.authenticate, function(req, res) {
   req.user.logout().then(function(user) {
     return res.status(204).send("");
   }).catch(handleError);
 });
 
-app.get("/profile", middleware.authenticate, function(req, res) {
+router.get("/profile", middleware.authenticate, function(req, res) {
   return res.status(200).json(req.user.renderJson());
 });
 
-app.get("/users", function(req, res) {
+router.get("/users", function(req, res) {
   models.User.find({}).then(function(users) {
     return res.status(200).json(_.map(users, function(user) {
       return user.renderJson();
@@ -79,20 +86,20 @@ app.get("/users", function(req, res) {
   }).catch(handleError);
 });
 
-app.get("/users/:id", function(req, res) {
+router.get("/users/:id", function(req, res) {
   models.User.findById(req.params.id).then(function(user) {
     if (!user) return notFound(res);
     return res.status(200).json(user.renderJson());
   }).catch(handleError);
 });
 
-app.get("/confirm/:token", function(req, res) {
+router.get("/confirm/:token", function(req, res) {
   models.User.confirm(req.params.token).then(function(user) {
     return res.status(200).send("Thanks for verifying your email address " + user.email + "!");
   }).catch(handleError);
 });
 
-app.post("/confirm/resend", middleware.authenticate, function(req, res) {
+router.post("/confirm/resend", middleware.authenticate, function(req, res) {
   req.user.sendConfirmation().then(function() {
     return res.status(201).json({
       message: "Confirmation message sent to: " + req.user.email
@@ -100,7 +107,7 @@ app.post("/confirm/resend", middleware.authenticate, function(req, res) {
   }).catch(handleError);
 });
 
-app.post("/signup", jsonParser, function(req, res) {
+router.post("/signup", jsonParser, function(req, res) {
   if (!req.body) return invalid(res);
   models.User.signup(req.body.email, req.body.password, req.body.password_confirmation).then(function(user) {
     return res.status(201).json({
@@ -110,13 +117,13 @@ app.post("/signup", jsonParser, function(req, res) {
 });
 
 // admin
-app.post('/admin/polls', jsonParser, middleware.authenticate, function(req, res) {
+router.post('/admin/polls', jsonParser, middleware.authenticate, function(req, res) {
   req.user.createPoll(req.body).then(function(poll) {
     return res.status(201).json(poll.renderJson(true));
   }).catch(handleError);
 });
 
-app.get('/admin/polls', middleware.authenticate, function(req, res) {
+router.get('/admin/polls', middleware.authenticate, function(req, res) {
   req.user.getPolls().then(function(polls) {
     return res.status(200).json(_.map(polls, function(poll) {
       return poll.renderJson(true);
@@ -124,26 +131,26 @@ app.get('/admin/polls', middleware.authenticate, function(req, res) {
   }).catch(handleError);
 });
 
-app.get('/admin/polls/:id', middleware.authenticate, function(req, res) {
+router.get('/admin/polls/:id', middleware.authenticate, function(req, res) {
   req.user.getPoll(req.params.id).then(function(poll) {
     return res.status(200).json(poll.renderJson(true));
   }).catch(handleError);
 });
 
-app.patch('/admin/polls/:id', jsonParser, middleware.authenticate, function(req, res) {
+router.patch('/admin/polls/:id', jsonParser, middleware.authenticate, function(req, res) {
   req.user.updatePoll(req.params.id, req.body).then(function(poll) {
     return res.status(200).json(poll.renderJson(true));
   }).catch(handleError);
 });
 
-app.delete('/admin/polls/:id', middleware.authenticate, function(req, res) {
+router.delete('/admin/polls/:id', middleware.authenticate, function(req, res) {
   req.user.deletePoll(req.params.id).then(function(poll) {
     return res.status(204).send("");
   }).catch(handleError);
 });
 
 // polls
-app.get('/polls', function(req, res) {
+router.get('/polls', function(req, res) {
   models.Poll.published().then(function(polls) {
     return res.status(200).json(_.map(polls, function(poll) {
       poll.renderJson();
@@ -151,7 +158,7 @@ app.get('/polls', function(req, res) {
   }).catch(handleError);
 });
 
-app.get('/polls/:id', function(req, res) {
+router.get('/polls/:id', function(req, res) {
   models.Poll.findOne({
     _id: req.params.id
   }).populate('_user').then(function(poll) {
@@ -163,7 +170,7 @@ app.get('/polls/:id', function(req, res) {
   });
 });
 
-app.post('/polls/:id/vote', jsonParser, function(req, res) {
+router.post('/polls/:id/vote', jsonParser, function(req, res) {
   models.Poll.findOne({
     _id: req.params.id
   }).then(function(poll) {

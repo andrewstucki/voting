@@ -40,17 +40,6 @@ module.exports = function(grunt) {
       }
     },
 
-    concat: {
-      scripts: {
-        files: {
-          '<%= config.dest %>/assets/scripts/app.js': [
-            '<%= config.bower %>/jquery/dist/jquery.js',
-            '<%= config.dest %>/assets/scripts/app.js'
-          ]
-        }
-      }
-    },
-
     less: {
       default: {
         files: {
@@ -103,7 +92,6 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-browserify');
@@ -116,8 +104,7 @@ module.exports = function(grunt) {
   grunt.registerTask('core', [
     'eslint',
     'browserify',
-    'copy',
-    'concat'
+    'copy'
   ]);
 
   grunt.registerTask('release', [
