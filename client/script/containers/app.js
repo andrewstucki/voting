@@ -1,7 +1,11 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { Link } from 'react-router'
+import { IndexLink, Link } from 'react-router'
 import { resetErrorMessage } from '../actions'
+
+import NavLink from '../components/nav-link'
+
+console.log(NavLink)
 
 class App extends Component {
   constructor(props) {
@@ -34,7 +38,6 @@ class App extends Component {
 
   render() {
     const { children } = this.props
-    let block = children;
     let header = "";
     if (this.props.url === "") {
       header = (
@@ -43,7 +46,7 @@ class App extends Component {
             <div>
               <h1>Voting</h1>
               <p className="lead">Create custom polls with live results.</p>
-              <Link to='/signup'>
+              <Link to='signup'>
                 <button className="btn btn-lg btn-success main-signup">Sign Up</button>
               </Link>
             </div>
@@ -55,25 +58,6 @@ class App extends Component {
             </div>
           </div>
         </header>
-      )
-      block = (
-        <div className="col-lg-12 home">
-          <div className="col-lg-4">
-            <i className="fa fa-bolt"></i>
-            <h2>Live Results</h2>
-            <p>Live graphs show your poll results immediately in an easy to understand format. One graph will not provide the whole picture, that's why we provide multiple graph types to better describe your results.</p>
-          </div>
-          <div className="col-lg-4">
-            <i className="fa fa-globe"></i>
-            <h2>Works Everywhere</h2>
-            <p>Traditional desktop computers now represent only 30% of Internet traffic. Your poll must work on the tablets, smart phones, netbooks and notebooks that your visitors are using. Our responsive designs do just that.</p>
-          </div>
-          <div className="col-lg-4">
-            <i className="fa fa-facebook"></i>
-            <h2>Social Integration</h2>
-            <p>Free integrated facebook or traditional comments allow your poll voters to provide immediate feedback and discuss results. Social share buttons encourage your poll voters to help spread the word.</p>
-          </div>
-        </div>
       )
     }
 
@@ -88,18 +72,18 @@ class App extends Component {
                 <span className="icon-bar"></span>
                 <span className="icon-bar"></span>
               </button>
-              <Link className="navbar-brand" to='/'>Voting</Link>
+              <IndexLink className="navbar-brand" to="/">Voting</IndexLink>
             </div>
             <div className="navbar-collapse collapse" id="navbar-main">
               <ul className="nav navbar-nav">
-                <li className="active">
-                  <Link to='/'>Home</Link>
+                <li>
+                  <Link activeClassName='active' to='/'>Home</Link>
                 </li>
                 <li>
-                  <Link to='/users'>Users</Link>
+                  <Link activeClassName='active' to='users'>Users</Link>
                 </li>
                 <li>
-                  <Link to='/polls'>Polls</Link>
+                  <Link activeClassName='active' to='polls'>Polls</Link>
                 </li>
                 <li>
                   <a href="#">Admin</a>
@@ -107,10 +91,10 @@ class App extends Component {
               </ul>
               <ul className="nav navbar-nav navbar-right">
                 <li>
-                  <Link to='/signup'>Sign Up</Link>
+                  <Link activeClassName='active' to='signup'>Sign Up</Link>
                 </li>
                 <li>
-                  <Link to='/login'>Log In</Link>
+                  <Link activeClassName='active'  to='login'>Log In</Link>
                 </li>
                 <li className="hide">
                   <p className="navbar-text">Hello</p>
@@ -126,7 +110,7 @@ class App extends Component {
         {header}
         <div className="container">
           <div className="row">
-            {block}
+            {children}
           </div>
         </div>
       </div>

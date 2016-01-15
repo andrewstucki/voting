@@ -1,12 +1,13 @@
 
 import React from 'react'
-import { Route } from 'react-router'
+import { Route, IndexRoute } from 'react-router'
 
 import App from './containers/app'
 import UsersPage from './containers/users-page'
 import UserPage from './containers/user-page'
 import PollsPage from './containers/polls-page'
 import PollPage from './containers/poll-page'
+import HomePage from './containers/home-page'
 import LoginPage from './containers/login-page'
 import SignupPage from './containers/signup-page'
 import AdminProfilePage from './containers/admin-profile-page'
@@ -15,14 +16,15 @@ import AdminNewPage from './containers/admin-new-page'
 
 export default (
   <Route path='/' component={App}>
-    <Route path='/login' component={LoginPage} />
-    <Route path='/signup' component={SignupPage} />
-    <Route path='/users' component={UsersPage} />
-    <Route path='/polls' component={PollsPage} />
-    <Route path='/users/:id' component={UserPage} />
-    <Route path='/polls/:id' component={PollPage} />
-    <Route path='/profile' component={AdminProfilePage} />
-    <Route path='/edit/:id' component={AdminEditPage} />
-    <Route path='/new' component={AdminNewPage} />
+    <IndexRoute component={HomePage} />
+    <Route path='/login' name='login' component={LoginPage} />
+    <Route path='/signup' name='signup' component={SignupPage} />
+    <Route path='/users' name='users' component={UsersPage} />
+    <Route path='/polls' name='polls' component={PollsPage} />
+    <Route path='/users/:id' name='user' component={UserPage} />
+    <Route path='/polls/:id' name='poll' component={PollPage} />
+    <Route path='/profile' name='admin-profile' component={AdminProfilePage} />
+    <Route path='/edit/:id' name='admin-edit' component={AdminEditPage} />
+    <Route path='/new' name='admin-new' component={AdminNewPage} />
   </Route>
 )
