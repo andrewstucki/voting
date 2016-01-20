@@ -31,13 +31,14 @@ class App extends Component {
 
   renderErrorMessage() {
     const { errorMessage } = this.props
-    if (!errorMessage) {
+
+    if (!errorMessage || !errorMessage.type) {
       return null
     }
 
     return (
-      <p style={{ backgroundColor: '#e99', padding: 10 }}>
-        <b>{errorMessage}</b>
+      <p style={{padding: 10}} className={`text-${errorMessage.type}`}>
+        <b>{errorMessage.message}</b>
         {' '}
         (<a href="#"
             onClick={this.handleDismissClick}>
@@ -95,7 +96,7 @@ class App extends Component {
     if (!this.props.isAuthenticated) {
       return (
         <ul className="nav navbar-nav navbar-right">
-          <NavLink to='/polls'>Sign Up</NavLink>
+          <NavLink to='/signup'>Sign Up</NavLink>
           <NavLink to='/login'>Log In</NavLink>
         </ul>
       )
@@ -150,7 +151,10 @@ class App extends Component {
 
 App.propTypes = {
   // Injected by React Redux
-  errorMessage: PropTypes.string,
+  errorMessage: PropTypes.shape({
+    type: PropTypes.string,
+    message: PropTypes.string
+  }),
   resetErrorMessage: PropTypes.func.isRequired,
   url: PropTypes.string.isRequired,
   // Injected by React Router

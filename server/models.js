@@ -13,6 +13,8 @@ var errors = require("./errors");
 
 if (!process.env.MANDRILL_APIKEY) throw new Error("Mandrill API key required!");
 
+var baseUrl = process.env.BASE_URL || "http://localhost:3000";
+
 var mailer = new mandrill.Mandrill(process.env.MANDRILL_APIKEY);
 var templates = {
   html: {},
@@ -24,12 +26,10 @@ _.each(["html", "plain"], function(templateType) {
   fs.readdir(dirname, function(err, filenames) {
     if (err) throw new Error("Unable to read template directory");
     _.each(filenames, function(filename) {
-      fs.readFile(dirname + filename, 'utf-8', function(err,
-        content) {
+      fs.readFile(dirname + filename, 'utf-8', function(err, content) {
         var templateName = filename.split(".")[0];
         if (err) throw new Error("Unable to read templates");
-        templates[templateType][templateName] = handlebars.compile(
-          content);
+        templates[templateType][templateName] = handlebars.compile(content);
       });
     });
   });
@@ -75,7 +75,7 @@ userSchema.statics.signup = function(email, password, passwordConfirmation, skip
     };
     var user = new schema(params);
     user.save().then(function(user) {
-      if (!skipEmail) return user.sendConfirmation().then(resolve);
+      if (!skipEmail) return user.sendConfirmation().then(resolve.bind(this, user));
       return resolve(user);
     }).catch(function(err) {
       if (err.code === 11000) return reject(new errors.ModelInvalid("Email Address Already Taken"));
@@ -150,7 +150,7 @@ userSchema.methods.generateEmail = function(subject, templateName, context) {
 
 userSchema.methods.sendConfirmation = function() {
   var user = this;
-  var confirmationLink = "http://localhost:3000/confirm/" + user.confirmationToken;
+  var confirmationLink = baseUrl + "/api/v1/confirm/" + user.confirmationToken;
 
   return new promise(function(resolve, reject) {
     if (user.confirmed) return reject(new errors.ModelInvalid("User email already confirmed"));
@@ -160,13 +160,14 @@ userSchema.methods.sendConfirmation = function() {
           confirmationLink: confirmationLink
         }),
       async: false
-    }, resolve, function(err) {
+    }, resolve.bind(this, user), function(err) {
       reject(new errors.ApiClientFailure(err.toString()));
     });
   });
 };
 
 userSchema.methods.createPoll = function(data) {
+  var user = this;
   var poll = new Poll({
     published: !!data.published,
     allowOther: !!data.allowOther,
@@ -175,11 +176,15 @@ userSchema.methods.createPoll = function(data) {
   });
   _.each(data.options || [], function(option) {
     poll.options.push(new Option({
-      value: option
+      value: option.value,
+      published: option.published
     }));
   });
   return new promise(function(resolve, reject){
-    return poll.save().populate('_user').then(resolve).catch(function(err){
+    return poll.save().then(function(poll) {
+      poll._user = user;
+      resolve(poll)
+    }).catch(function(err){
       if (err.code === 11000) return reject(new errors.ModelInvalid("Invalid Poll"));
       return reject(new errors.DatabaseFailure(err.toString()));
     });

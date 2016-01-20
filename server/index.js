@@ -95,7 +95,7 @@ router.get("/users/:id", function(req, res) {
 
 router.get("/confirm/:token", function(req, res) {
   models.User.confirm(req.params.token).then(function(user) {
-    return res.status(200).send("Thanks for verifying your email address " + user.email + "!");
+    return res.redirect('/login?confirmed=true');
   }).catch(handleError.bind(this, res));
 });
 
@@ -120,7 +120,7 @@ router.post("/signup", jsonParser, function(req, res) {
 router.post('/admin/polls', jsonParser, middleware.authenticate, function(req, res) {
   req.user.createPoll(req.body).then(function(poll) {
     return res.status(201).json(poll.renderJson(true));
-  }).catch(handleError);
+  }).catch(handleError.bind(this, res));
 });
 
 router.get('/admin/polls', middleware.authenticate, function(req, res) {
@@ -153,7 +153,7 @@ router.delete('/admin/polls/:id', middleware.authenticate, function(req, res) {
 router.get('/polls', function(req, res) {
   models.Poll.published().then(function(polls) {
     return res.status(200).json(_.map(polls, function(poll) {
-      poll.renderJson();
+      return poll.renderJson();
     }));
   }).catch(handleError.bind(this, res));
 });

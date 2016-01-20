@@ -19,6 +19,7 @@ function getNextPageUrl(response) {
 const API_ROOT = (process.env.NODE_ENV === "production") ? process.env.API_URL || '/api/v1' : '/api/v1'
 
 function normalize(data, model) {
+  if (!model) return data
   let normalizedJson = {}
   let returnedJson = {}
   if (Array.isArray(data)) {
@@ -123,6 +124,7 @@ export default store => next => action => {
       type: successType
     })),
     err => {
+      console.log(err)
       next(actionWith({
       type: failureType,
       error: err.error || 'Something bad happened'

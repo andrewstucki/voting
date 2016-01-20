@@ -1,11 +1,17 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { login } from '../actions'
+import { login, setErrorMessage } from '../actions'
 
 class LoginPage extends Component {
   constructor(props) {
     super(props)
+
+    let { query } = this.props.location
+
     this.doLogin = this.doLogin.bind(this)
+    if (query.confirmed) {
+      this.props.setErrorMessage({type: "success", message: "Thanks for confirming your account, please log in below"})
+    }
   }
 
   doLogin(evt) {
@@ -25,18 +31,18 @@ class LoginPage extends Component {
           </div>
           <div className="form-group">
             <label htmlFor="password">Enter your password.</label>
-            <input className="form-control" id="password" name="password" placeholder="password" type="password" required />
+            <input className="form-control" id="password" name="password" placeholder="********" type="password" required />
           </div>
           <div className="form-buttons">
             <button className="btn btn-success" type="submit" onClick={this.doLogin}>Submit</button>
           </div>
         </form>
-        <button className="btn btn-success btn-block" id="logout">Logout</button>
       </div>
     )
   }
 }
 
 export default connect(null, {
-  login
+  login,
+  setErrorMessage
 })(LoginPage)

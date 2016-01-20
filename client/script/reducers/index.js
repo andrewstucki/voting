@@ -9,6 +9,7 @@ import paginate from './paginate'
 // Updates authentication state
 function auth(state = { isAuthenticated: false, user: {} }, action) {
   switch (action.type) {
+  // case ActionTypes.
     case ActionTypes.LOGIN_SUCCESS:
       const user = Object.values(action.response.user)[0]
       localStorage.setItem("token", user.token)
@@ -43,8 +44,18 @@ function errorMessage(state = null, action) {
 
   if (type === ActionTypes.RESET_ERROR_MESSAGE) {
     return null
+  } else if (type === ActionTypes.SET_ERROR_MESSAGE) {
+    return action.payload
+  } else if (type === ActionTypes.SIGNUP_SUCCESS) {
+    return {
+      type: "success",
+      message: action.response.message
+    }
   } else if (error) {
-    return action.error
+    return {
+      type: "danger",
+      message: action.error
+    }
   }
 
   return state
@@ -61,7 +72,7 @@ const pagination = combineReducers({
     ActionTypes.POLLS_REQUEST,
     ActionTypes.POLLS_SUCCESS,
     ActionTypes.POLLS_FAILURE
-  ], 'userPage')
+  ], 'pollPage')
 })
 
 const rootReducer = combineReducers({

@@ -1,5 +1,23 @@
 import { CALL_API } from '../middleware/api'
 
+export const CREATE_POLL_REQUEST = 'CREATE_POLL_REQUEST'
+export const CREATE_POLL_SUCCESS = 'CREATE_POLL_SUCCESS'
+export const CREATE_POLL_FAILURE = 'CREATE_POLL_FAILURE'
+
+export function createPoll(poll) {
+  return (dispatch, getState) => {
+    return dispatch({
+      [CALL_API]: {
+        types: [ CREATE_POLL_REQUEST, CREATE_POLL_SUCCESS, CREATE_POLL_FAILURE ],
+        model: 'polls',
+        endpoint: '/admin/polls',
+        method: 'post',
+        params: poll
+      }
+    })
+  }
+}
+
 export const LOGOUT_REQUEST = 'LOGOUT_REQUEST'
 export const LOGOUT_SUCCESS = 'LOGOUT_SUCCESS'
 export const LOGOUT_FAILURE = 'LOGOUT_FAILURE'
@@ -41,6 +59,29 @@ export function login(email, password) {
   }
 }
 
+export const SIGNUP_REQUEST = 'SIGNUP_REQUEST'
+export const SIGNUP_SUCCESS = 'SIGNUP_SUCCESS'
+export const SIGNUP_FAILURE = 'SIGNUP_FAILURE'
+
+// Signs up the user to the application using the API.
+// Relies on the custom API middleware defined in ../middleware/api.js.
+export function signup(email, password, confirmation) {
+  return (dispatch, getState) => {
+    return dispatch({
+      [CALL_API]: {
+        types: [ SIGNUP_REQUEST, SIGNUP_SUCCESS, SIGNUP_FAILURE ],
+        endpoint: '/signup',
+        method: 'post',
+        params: {
+          email: email,
+          password: password,
+          password_confirmation: confirmation
+        }
+      }
+    })
+  }
+}
+
 export const USER_REQUEST = 'USER_REQUEST'
 export const USER_SUCCESS = 'USER_SUCCESS'
 export const USER_FAILURE = 'USER_FAILURE'
@@ -70,16 +111,12 @@ export function loadUser(id, requiredFields = []) {
   }
 }
 
-export const POLL_REQUEST = 'POLL_REQUEST'
-export const POLL_SUCCESS = 'POLL_SUCCESS'
-export const POLL_FAILURE = 'POLL_FAILURE'
-
 // Fetches a single poll from the API.
 // Relies on the custom API middleware defined in ../middleware/api.js.
 function fetchPoll(id) {
   return {
     [CALL_API]: {
-      types: [ POLL_REQUEST, POLL_SUCCESS, POLL_FAILURE ],
+      types: [ POLLS_REQUEST, POLLS_SUCCESS, POLLS_FAILURE ],
       model: 'polls',
       endpoint: `/polls/${id}`
     }
@@ -167,12 +204,22 @@ export function loadPolls(nextPage) {
   }
 }
 
-
 export const RESET_ERROR_MESSAGE = 'RESET_ERROR_MESSAGE'
+export const SET_ERROR_MESSAGE = 'SET_ERROR_MESSAGE'
 
 // Resets the currently visible error message.
 export function resetErrorMessage() {
   return {
     type: RESET_ERROR_MESSAGE
+  }
+}
+
+export function setErrorMessage({message: message, type: type}) {
+  return {
+    type: SET_ERROR_MESSAGE,
+    payload: {
+      message: message,
+      type: type
+    }
   }
 }
