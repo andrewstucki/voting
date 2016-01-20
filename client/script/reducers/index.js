@@ -7,22 +7,25 @@ import * as ActionTypes from '../actions'
 import paginate from './paginate'
 
 // Updates authentication state
-function auth(state = { isAuthenticated: false, user: {} }, action) {
+function auth(state = { isAuthenticated: false, user: { polls: [] } }, action) {
   switch (action.type) {
   // case ActionTypes.
+    case ActionTypes.MY_POLLS_SUCCESS:
+      const polls = Object.values(action.response.mypolls)
+      return Object.assign({}, state, { user: Object.assign({}, state.user, { polls: polls })})
     case ActionTypes.LOGIN_SUCCESS:
       const user = Object.values(action.response.user)[0]
       localStorage.setItem("token", user.token)
       return {
         isAuthenticated: true,
-        user: user
+        user: Object.assign({}, user, { polls: [] })
       }
     case ActionTypes.LOGOUT_SUCCESS:
     case ActionTypes.LOGIN_FAILURE:
       localStorage.removeItem("token")
       return {
         isAuthenticated: false,
-        user: {}
+        user: { polls: [] }
       }
     default:
       return state

@@ -11,7 +11,7 @@ function initializeApplication(user) {
   let store
   if (user) {
     store = configureStore({
-      auth: { isAuthenticated: true, user: user },
+      auth: { isAuthenticated: true, user: Object.assign({}, user, { polls: [] }) },
     })
   } else {
     store = configureStore()

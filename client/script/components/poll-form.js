@@ -18,7 +18,7 @@ export default class PollForm extends Component {
   }
 
   componentWillMount(props) {
-    if (props && props.poll.options) {
+    if (props && (props.poll.options !== this.props.poll.options)) {
       this.setState({
         options: props.poll.options
       })
@@ -26,7 +26,7 @@ export default class PollForm extends Component {
   }
 
   componentWillReceiveProps(props) {
-    if (props && props.poll.options) {
+    if (props && (props.poll.options !== this.props.poll.options)) {
       this.setState({
         options: props.poll.options
       })

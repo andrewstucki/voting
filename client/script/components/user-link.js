@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { Link } from 'react-router'
 
-export default class User extends Component {
+export default class UserLink extends Component {
   render() {
     const { id, email } = this.props.user
 
@@ -15,7 +15,7 @@ export default class User extends Component {
   }
 }
 
-User.propTypes = {
+UserLink.propTypes = {
   user: PropTypes.shape({
     id: PropTypes.string.isRequired,
     email: PropTypes.string.isRequired

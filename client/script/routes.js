@@ -26,7 +26,7 @@ export default (
     <Route path='/users/:id' name='user' component={UserPage} />
     <Route path='/polls/:id' name='poll' component={PollPage} />
     <Route path='/profile' name='admin-profile' component={requireAuth(AdminProfilePage)} />
-    <Route path='/polls/:id/edit' name='admin-edit' component={requireAuth(AdminEditPage)} />
+    <Route path='/edit/:id' name='admin-edit' component={requireAuth(AdminEditPage)} />
     <Route path='/new' name='admin-new' component={requireAuth(AdminNewPage)} />
   </Route>
 )

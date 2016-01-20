@@ -4,7 +4,7 @@ export const CREATE_POLL_REQUEST = 'CREATE_POLL_REQUEST'
 export const CREATE_POLL_SUCCESS = 'CREATE_POLL_SUCCESS'
 export const CREATE_POLL_FAILURE = 'CREATE_POLL_FAILURE'
 
-export function createPoll(poll) {
+export function createPoll(poll, callback) {
   return (dispatch, getState) => {
     return dispatch({
       [CALL_API]: {
@@ -12,7 +12,8 @@ export function createPoll(poll) {
         model: 'polls',
         endpoint: '/admin/polls',
         method: 'post',
-        params: poll
+        params: poll,
+        callback: callback
       }
     })
   }
@@ -162,11 +163,11 @@ export function loadUsers(nextPage) {
       pageCount = 0
     } = getState().pagination.users || {}
 
-    if (pageCount > 0 && !nextPage) {
-      return null
-    }
+    // if (pageCount > 0 && !nextPage) {
+    //   return null
+    // }
 
-    return dispatch(fetchUsers(nextPageUrl))
+    return dispatch(fetchUsers(nextPageUrl || '/users'))
   }
 }
 
@@ -196,11 +197,29 @@ export function loadPolls(nextPage) {
       pageCount = 0
     } = getState().pagination.polls || {}
 
-    if (pageCount > 0 && !nextPage) {
-      return null
-    }
+    // if (pageCount > 0 && !nextPage) {
+    //   return null
+    // }
 
-    return dispatch(fetchPolls(nextPageUrl))
+    return dispatch(fetchPolls(nextPageUrl || '/polls'))
+  }
+}
+
+export const MY_POLLS_REQUEST = 'MY_POLLS_REQUEST'
+export const MY_POLLS_SUCCESS = 'MY_POLLS_SUCCESS'
+export const MY_POLLS_FAILURE = 'MY_POLLS_FAILURE'
+
+// Fetches the polls for the admin.
+// Relies on Redux Thunk middleware.
+export function loadMyPolls() {
+  return (dispatch, getState) => {
+    return dispatch({
+      [CALL_API]: {
+        types: [ MY_POLLS_REQUEST, MY_POLLS_SUCCESS, MY_POLLS_FAILURE ],
+        endpoint: '/admin/polls',
+        model: 'mypolls'
+      }
+    })
   }
 }
 
@@ -221,5 +240,35 @@ export function setErrorMessage({message: message, type: type}) {
       message: message,
       type: type
     }
+  }
+}
+
+export const VOTE_REQUEST = 'VOTE_REQUEST'
+export const VOTE_SUCCESS = 'VOTE_SUCCESS'
+export const VOTE_FAILURE = 'VOTE_FAILURE'
+
+export function vote(poll, response, callback) {
+  console.log(callback)
+  return (dispatch, getState) => {
+    console.log({
+      [CALL_API]: {
+        types: [ VOTE_REQUEST, VOTE_SUCCESS, VOTE_FAILURE ],
+        endpoint: `/polls/${poll}/vote`,
+        model: 'vote',
+        method: 'post',
+        callback: callback,
+        params: response
+      }
+    })
+    return dispatch({
+      [CALL_API]: {
+        types: [ VOTE_REQUEST, VOTE_SUCCESS, VOTE_FAILURE ],
+        endpoint: `/polls/${poll}/vote`,
+        model: 'vote',
+        method: 'post',
+        callback: callback,
+        params: response
+      }
+    })
   }
 }

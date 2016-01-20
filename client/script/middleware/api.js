@@ -69,14 +69,16 @@ export const CALL_API = Symbol('Call API')
 // A Redux middleware that interprets actions with CALL_API info specified.
 // Performs the call and promises when such actions are dispatched.
 export default store => next => action => {
+  console.log("api call " + action)
   const callAPI = action[CALL_API]
   if (typeof callAPI === 'undefined') {
     return next(action)
   }
+  console.log("api call")
 
   let { endpoint } = callAPI
   const { model, types } = callAPI
-  const { params, method } = callAPI
+  const { params, method, callback } = callAPI
   const state = store.getState()
 
   if (typeof endpoint === 'function') {
@@ -118,11 +120,15 @@ export default store => next => action => {
     }
   }
 
+  console.log("requesting " + endpoint)
   return callApi(endpoint, model, authHeaders, method, params).then(
-    response => next(actionWith({
-      response,
-      type: successType
-    })),
+    response => {
+      if (callback && model) callback(response[model])
+      next(actionWith({
+        response,
+        type: successType
+      }))
+    },
     err => {
       console.log(err)
       next(actionWith({

@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { loadPolls } from '../actions'
-import Poll from '../components/poll'
+import PollLink from '../components/poll-link'
 import List from '../components/list'
 
 function loadData(props) {
@@ -20,7 +20,7 @@ class PollsPage extends Component {
 
   renderPoll(poll) {
     return (
-      <Poll poll={poll}
+      <PollLink link="polls" poll={poll}
             key={poll.id} />
     )
   }

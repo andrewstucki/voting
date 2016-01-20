@@ -1,22 +1,17 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { loadPoll } from '../actions'
-import PollForm from '../components/poll-form'
+import Poll from '../components/poll'
 
 class PollPage extends Component {
   constructor(props) {
     super(props)
     this.props.loadPoll(this.props.params.id)
-    this.submitForm = this.submitForm.bind(this)
-  }
-
-  submitForm(poll) {
-    console.log(poll)
   }
 
   render() {
     return (
-      <PollForm poll={this.props.poll} onSubmit={this.submitForm} />
+      <Poll poll={this.props.poll} />
     )
   }
 }

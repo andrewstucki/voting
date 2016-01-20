@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { loadUsers } from '../actions'
-import User from '../components/user'
+import UserLink from '../components/user-link'
 import List from '../components/list'
 
 function loadData(props) {
@@ -20,7 +20,7 @@ class UsersPage extends Component {
 
   renderUser(user) {
     return (
-      <User user={user}
+      <UserLink user={user}
             key={user.id} />
     )
   }
