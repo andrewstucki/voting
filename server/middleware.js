@@ -8,11 +8,11 @@ var unauthorized = function(res) {
 
 var authenticate = function(req, res, next) {
   var token = req.get("x-voting-session");
-  if (!token) return unauthorized();
+  if (!token) return unauthorized(res);
   models.User.findOne({
     sessionToken: token
   }).then(function(user) {
-    if (!user) return unauthorized();
+    if (!user) return unauthorized(res);
     req.user = user;
     return next();
   }).catch(function(err) {

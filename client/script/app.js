@@ -5,10 +5,27 @@ import React from 'react'
 import { render } from 'react-dom'
 import Root from './containers/root'
 import configureStore from './store/configureStore'
+import { callApi } from './middleware/api'
 
-const store = configureStore()
+function initializeApplication(user) {
+  let store
+  if (user) {
+    store = configureStore({
+      auth: { isAuthenticated: true, user: user },
+    })
+  } else {
+    store = configureStore()
+  }
 
-render(
-  <Root store={store} />,
-  document.getElementById('app')
-)
+  render(
+    <Root store={store} />,
+    document.getElementById('app')
+  )
+}
+
+const token = localStorage.getItem("token")
+callApi('/profile', 'user', { 'X-Voting-Session': token || '' }).then(function(data) {
+  initializeApplication(Object.values(data.user)[0])
+}).catch(function(err) {
+  initializeApplication()
+})

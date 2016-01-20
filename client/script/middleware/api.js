@@ -24,20 +24,30 @@ function normalize(data, model) {
   if (Array.isArray(data)) {
     data.forEach(json => (normalizedJson[json.id] = json))
   } else {
-    normalizedJson[json.id] = json
+    normalizedJson[data.id] = data
   }
   returnedJson[model] = normalizedJson
   return returnedJson
 }
 
 // Fetches an API response and normalizes the result JSON.
-function callApi(endpoint, model) {
+export function callApi(endpoint, model, headers = {}, method = 'get', params = null) {
   const fullUrl = (endpoint.indexOf(API_ROOT) === -1) ? API_ROOT + endpoint : endpoint
+  const ajaxHeaders = Object.assign({}, headers, {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  })
+  let payload = {
+    method: method,
+    headers: ajaxHeaders
+  }
 
-  return fetch(fullUrl)
-    .then(response =>
-      response.json().then(json => ({ json, response }))
-    ).then(({ json, response }) => {
+  if (params) {
+    payload = Object.assign(payload, {body: JSON.stringify(params)})
+  }
+  return fetch(fullUrl, payload)
+    .then(response => response.json().then(json => ({ json, response })))
+    .then(({ json, response }) => {
       if (!response.ok) {
         return Promise.reject(json)
       }
@@ -65,15 +75,17 @@ export default store => next => action => {
 
   let { endpoint } = callAPI
   const { model, types } = callAPI
+  const { params, method } = callAPI
+  const state = store.getState()
 
   if (typeof endpoint === 'function') {
-    endpoint = endpoint(store.getState())
+    endpoint = endpoint(state)
   }
 
   if (typeof endpoint !== 'string') {
     throw new Error('Specify a string endpoint URL.')
   }
-  if (!model || typeof model !== 'string') {
+  if (model && typeof model !== 'string') {
     throw new Error('Specify a string of the response model type.')
   }
   if (!Array.isArray(types) || types.length !== 3) {
@@ -81,6 +93,12 @@ export default store => next => action => {
   }
   if (!types.every(type => typeof type === 'string')) {
     throw new Error('Expected action types to be strings.')
+  }
+  if (params && typeof params !== 'object') {
+    throw new Error('Expected action params to be an object.')
+  }
+  if (method && typeof method !== 'string') {
+    throw new Error('Expected action method to be a string.')
   }
 
   function actionWith(data) {
@@ -92,14 +110,22 @@ export default store => next => action => {
   const [ requestType, successType, failureType ] = types
   next(actionWith({ type: requestType }))
 
-  return callApi(endpoint, model).then(
+  let authHeaders = {}
+  if (state.auth.isAuthenticated) {
+    authHeaders = {
+      'X-Voting-Session': state.auth.user.token
+    }
+  }
+
+  return callApi(endpoint, model, authHeaders, method, params).then(
     response => next(actionWith({
       response,
       type: successType
     })),
-    error => next(actionWith({
+    err => {
+      next(actionWith({
       type: failureType,
-      error: error.message || 'Something bad happened'
-    }))
+      error: err.error || 'Something bad happened'
+    }))}
   )
 }

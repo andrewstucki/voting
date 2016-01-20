@@ -24,7 +24,7 @@ export default class List extends Component {
 
     const isLastPage = !nextPageUrl
     if (isEmpty && isLastPage) {
-      return <h1><i>Nothing here!</i></h1>
+      return <p>Nothing here!</p>
     }
 
     return (

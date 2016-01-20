@@ -1,6 +1,20 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { login } from '../actions'
 
-export default class LoginPage extends Component {
+class LoginPage extends Component {
+  constructor(props) {
+    super(props)
+    this.doLogin = this.doLogin.bind(this)
+  }
+
+  doLogin(evt) {
+    evt.preventDefault()
+    const email = document.getElementById("email").value
+    const password = document.getElementById("password").value
+    this.props.login(email, password)
+  }
+
   render() {
     return (
       <div className="col-lg-12 login-form">
@@ -14,7 +28,7 @@ export default class LoginPage extends Component {
             <input className="form-control" id="password" name="password" placeholder="password" type="password" required />
           </div>
           <div className="form-buttons">
-            <button className="btn btn-success" type="submit">Submit</button>
+            <button className="btn btn-success" type="submit" onClick={this.doLogin}>Submit</button>
           </div>
         </form>
         <button className="btn btn-success btn-block" id="logout">Logout</button>
@@ -22,3 +36,7 @@ export default class LoginPage extends Component {
     )
   }
 }
+
+export default connect(null, {
+  login
+})(LoginPage)

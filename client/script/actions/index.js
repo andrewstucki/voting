@@ -1,20 +1,49 @@
 import { CALL_API } from '../middleware/api'
 
+export const LOGOUT_REQUEST = 'LOGOUT_REQUEST'
+export const LOGOUT_SUCCESS = 'LOGOUT_SUCCESS'
+export const LOGOUT_FAILURE = 'LOGOUT_FAILURE'
+
+// Logs out the user using the API.
+// Relies on the custom API middleware defined in ../middleware/api.js.
+export function logout() {
+  return (dispatch, getState) => {
+    return dispatch({
+      [CALL_API]: {
+        types: [ LOGOUT_REQUEST, LOGOUT_SUCCESS, LOGOUT_FAILURE ],
+        endpoint: '/session',
+        method: 'delete'
+      }
+    })
+  }
+}
+
+export const LOGIN_REQUEST = 'LOGIN_REQUEST'
+export const LOGIN_SUCCESS = 'LOGIN_SUCCESS'
+export const LOGIN_FAILURE = 'LOGIN_FAILURE'
+
+// Logs in the user to the application using the API.
+// Relies on the custom API middleware defined in ../middleware/api.js.
+export function login(email, password) {
+  return (dispatch, getState) => {
+    return dispatch({
+      [CALL_API]: {
+        types: [ LOGIN_REQUEST, LOGIN_SUCCESS, LOGIN_FAILURE ],
+        model: 'user',
+        endpoint: '/session',
+        method: 'post',
+        params: {
+          email: email,
+          password: password
+        }
+      }
+    })
+  }
+}
+
 export const USER_REQUEST = 'USER_REQUEST'
 export const USER_SUCCESS = 'USER_SUCCESS'
 export const USER_FAILURE = 'USER_FAILURE'
-
-// Fetches the currently logged in user from the API.
-// Relies on the custom API middleware defined in ../middleware/api.js.
-function fetchProfile() {
-  return {
-    [CALL_API]: {
-      types: [ USER_REQUEST, USER_SUCCESS, USER_FAILURE ],
-      model: 'users',
-      endpoint: '/profile'
-    }
-  }
-}
 
 // Fetches a single user from the API.
 // Relies on the custom API middleware defined in ../middleware/api.js.

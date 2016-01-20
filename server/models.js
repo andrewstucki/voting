@@ -258,6 +258,8 @@ userSchema.methods.deletePoll = function(id) {
 
 userSchema.methods.renderToken = function() {
   return {
+    id: this._id,
+    email: this.email,
     token: this.sessionToken
   };
 };

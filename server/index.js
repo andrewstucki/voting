@@ -15,7 +15,7 @@ var jsonParser = bodyParser.json();
 var port = process.env.PORT || config.port;
 
 app.use(express.static('public'));
-app.get(/^\/(users|login|signup|polls|admin).*/, function(req, res) {
+app.get(/^\/(users|login|signup|polls|edit|new|profile).*/, function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../public/index.html'));
 });
 
@@ -65,17 +65,17 @@ router.post("/session", jsonParser, function(req, res) {
   if (!req.body) return unauthorized(res);
   models.User.login(req.body.email, req.body.password).then(function(user) {
     return res.status(201).json(user.renderToken());
-  }).catch(handleError);
+  }).catch(handleError.bind(this, res));
 });
 
 router.delete("/session", middleware.authenticate, function(req, res) {
   req.user.logout().then(function(user) {
-    return res.status(204).send("");
-  }).catch(handleError);
+    return res.status(202).send({});
+  }).catch(handleError.bind(this, res));
 });
 
 router.get("/profile", middleware.authenticate, function(req, res) {
-  return res.status(200).json(req.user.renderJson());
+  return res.status(200).json(req.user.renderToken());
 });
 
 router.get("/users", function(req, res) {
@@ -83,20 +83,20 @@ router.get("/users", function(req, res) {
     return res.status(200).json(_.map(users, function(user) {
       return user.renderJson();
     }));
-  }).catch(handleError);
+  }).catch(handleError.bind(this, res));
 });
 
 router.get("/users/:id", function(req, res) {
   models.User.findById(req.params.id).then(function(user) {
     if (!user) return notFound(res);
     return res.status(200).json(user.renderJson());
-  }).catch(handleError);
+  }).catch(handleError.bind(this, res));
 });
 
 router.get("/confirm/:token", function(req, res) {
   models.User.confirm(req.params.token).then(function(user) {
     return res.status(200).send("Thanks for verifying your email address " + user.email + "!");
-  }).catch(handleError);
+  }).catch(handleError.bind(this, res));
 });
 
 router.post("/confirm/resend", middleware.authenticate, function(req, res) {
@@ -104,7 +104,7 @@ router.post("/confirm/resend", middleware.authenticate, function(req, res) {
     return res.status(201).json({
       message: "Confirmation message sent to: " + req.user.email
     });
-  }).catch(handleError);
+  }).catch(handleError.bind(this, res));
 });
 
 router.post("/signup", jsonParser, function(req, res) {
@@ -113,7 +113,7 @@ router.post("/signup", jsonParser, function(req, res) {
     return res.status(201).json({
       message: "Confirmation message sent to: " + user.email
     });
-  }).catch(handleError);
+  }).catch(handleError.bind(this, res));
 });
 
 // admin
@@ -128,25 +128,25 @@ router.get('/admin/polls', middleware.authenticate, function(req, res) {
     return res.status(200).json(_.map(polls, function(poll) {
       return poll.renderJson(true);
     }));
-  }).catch(handleError);
+  }).catch(handleError.bind(this, res));
 });
 
 router.get('/admin/polls/:id', middleware.authenticate, function(req, res) {
   req.user.getPoll(req.params.id).then(function(poll) {
     return res.status(200).json(poll.renderJson(true));
-  }).catch(handleError);
+  }).catch(handleError.bind(this, res));
 });
 
 router.patch('/admin/polls/:id', jsonParser, middleware.authenticate, function(req, res) {
   req.user.updatePoll(req.params.id, req.body).then(function(poll) {
     return res.status(200).json(poll.renderJson(true));
-  }).catch(handleError);
+  }).catch(handleError.bind(this, res));
 });
 
 router.delete('/admin/polls/:id', middleware.authenticate, function(req, res) {
   req.user.deletePoll(req.params.id).then(function(poll) {
-    return res.status(204).send("");
-  }).catch(handleError);
+    return res.status(202).send({});
+  }).catch(handleError.bind(this, res));
 });
 
 // polls
@@ -155,7 +155,7 @@ router.get('/polls', function(req, res) {
     return res.status(200).json(_.map(polls, function(poll) {
       poll.renderJson();
     }));
-  }).catch(handleError);
+  }).catch(handleError.bind(this, res));
 });
 
 router.get('/polls/:id', function(req, res) {
@@ -179,7 +179,7 @@ router.post('/polls/:id/vote', jsonParser, function(req, res) {
       return res.status(201).json({
         message: "Thank you for voting"
       });
-    }).catch(handleError);
+    }).catch(handleError.bind(this, res));
   }).catch(function(err) {
     console.log(err.toString());
     return internalError(res);

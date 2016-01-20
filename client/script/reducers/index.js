@@ -6,6 +6,28 @@ import { combineReducers } from 'redux'
 import * as ActionTypes from '../actions'
 import paginate from './paginate'
 
+// Updates authentication state
+function auth(state = { isAuthenticated: false, user: {} }, action) {
+  switch (action.type) {
+    case ActionTypes.LOGIN_SUCCESS:
+      const user = Object.values(action.response.user)[0]
+      localStorage.setItem("token", user.token)
+      return {
+        isAuthenticated: true,
+        user: user
+      }
+    case ActionTypes.LOGOUT_SUCCESS:
+    case ActionTypes.LOGIN_FAILURE:
+      localStorage.removeItem("token")
+      return {
+        isAuthenticated: false,
+        user: {}
+      }
+    default:
+      return state
+  }
+}
+
 // Updates an entity cache in response to any action with response.entities.
 function entities(state = { users: {}, polls: {} }, action) {
   if (action.response) {
@@ -45,6 +67,7 @@ const pagination = combineReducers({
 const rootReducer = combineReducers({
   entities,
   pagination,
+  auth,
   errorMessage,
   router
 })

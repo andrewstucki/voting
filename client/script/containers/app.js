@@ -1,20 +1,31 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import { IndexLink, Link } from 'react-router'
-import { resetErrorMessage } from '../actions'
+import { NavDropdown, MenuItem } from 'react-bootstrap'
+import { LinkContainer } from 'react-router-bootstrap'
+import { resetErrorMessage, logout } from '../actions'
 
 import NavLink from '../components/nav-link'
-
-console.log(NavLink)
 
 class App extends Component {
   constructor(props) {
     super(props)
     this.handleDismissClick = this.handleDismissClick.bind(this)
+    this.doLogout = this.doLogout.bind(this)
+    this.preventDefault = this.preventDefault.bind(this)
+  }
+
+  doLogout(e) {
+    e.preventDefault()
+    this.props.logout()
   }
 
   handleDismissClick(e) {
     this.props.resetErrorMessage()
+    e.preventDefault()
+  }
+
+  preventDefault(e) {
     e.preventDefault()
   }
 
@@ -36,17 +47,15 @@ class App extends Component {
     )
   }
 
-  render() {
-    const { children } = this.props
-    let header = "";
+  header() {
     if (this.props.url === "") {
-      header = (
+      return (
         <header className="hero-unit" id="banner">
           <div className="container">
             <div>
               <h1>Voting</h1>
               <p className="lead">Create custom polls with live results.</p>
-              <Link to='signup'>
+              <Link to='/signup'>
                 <button className="btn btn-lg btn-success main-signup">Sign Up</button>
               </Link>
             </div>
@@ -60,6 +69,53 @@ class App extends Component {
         </header>
       )
     }
+    return ""
+  }
+
+  leftNavbar() {
+    let admin = ""
+    if (this.props.isAuthenticated) {
+      admin = (
+        <NavDropdown eventKey={3} title="Admin" id="basic-nav-dropdown">
+          <LinkContainer to='/new'><MenuItem eventKey={3.1}>New Poll</MenuItem></LinkContainer>
+          <LinkContainer to='/profile'><MenuItem eventKey={3.2}>Profile</MenuItem></LinkContainer>
+        </NavDropdown>
+      )
+    }
+    return (
+      <ul className="nav navbar-nav">
+        <NavLink to='/users'>Users</NavLink>
+        <NavLink to='/polls'>Polls</NavLink>
+        {admin}
+      </ul>
+    )
+  }
+
+  rightNavbar() {
+    if (!this.props.isAuthenticated) {
+      return (
+        <ul className="nav navbar-nav navbar-right">
+          <NavLink to='/polls'>Sign Up</NavLink>
+          <NavLink to='/login'>Log In</NavLink>
+        </ul>
+      )
+    }
+    return (
+      <ul className="nav navbar-nav navbar-right">
+        <li>
+          <p className="navbar-text">Hello <Link to='/profile'>{this.props.currentUser.email}</Link></p>
+        </li>
+        <li>
+          <a href="#" onClick={this.doLogout}>Log Out</a>
+        </li>
+      </ul>
+    )
+  }
+
+  render() {
+    const { children } = this.props
+
+    const linkTo = this.props.isAuthenticated ? "/profile" : "/"
 
     return (
       <div>
@@ -72,31 +128,16 @@ class App extends Component {
                 <span className="icon-bar"></span>
                 <span className="icon-bar"></span>
               </button>
-              <IndexLink className="navbar-brand" to="/">Voting</IndexLink>
+              <IndexLink className="navbar-brand" to={linkTo}>Voting</IndexLink>
             </div>
             <div className="navbar-collapse collapse" id="navbar-main">
-              <ul className="nav navbar-nav">
-                <NavLink to='users'>Users</NavLink>
-                <NavLink to='polls'>Polls</NavLink>
-                <li>
-                  <a href="#">Admin</a>
-                </li>
-              </ul>
-              <ul className="nav navbar-nav navbar-right">
-                <NavLink to='polls'>Sign Up</NavLink>
-                <NavLink to='login'>Log In</NavLink>
-                <li className="hide">
-                  <p className="navbar-text">Hello</p>
-                </li>
-                <li className="hide">
-                  <a href="#">Log Out</a>
-                </li>
-              </ul>
+              {this.leftNavbar()}
+              {this.rightNavbar()}
             </div>
           </div>
         </div>
         {this.renderErrorMessage()}
-        {header}
+        {this.header()}
         <div className="container">
           <div className="row">
             {children}
@@ -119,10 +160,13 @@ App.propTypes = {
 function mapStateToProps(state) {
   return {
     errorMessage: state.errorMessage,
+    isAuthenticated: state.auth.isAuthenticated,
+    currentUser: state.auth.user,
     url: state.router.location.pathname.substring(1)
   }
 }
 
 export default connect(mapStateToProps, {
-  resetErrorMessage
+  resetErrorMessage,
+  logout
 })(App)

@@ -14,17 +14,19 @@ import AdminProfilePage from './containers/admin-profile-page'
 import AdminEditPage from './containers/admin-edit-page'
 import AdminNewPage from './containers/admin-new-page'
 
+import { requireAuth, noAuth } from './components/auth'
+
 export default (
   <Route path='/' component={App}>
     <IndexRoute component={HomePage} />
-    <Route path='/login' name='login' component={LoginPage} />
-    <Route path='/signup' name='signup' component={SignupPage} />
+    <Route path='/login' name='login' component={noAuth(LoginPage)} />
+    <Route path='/signup' name='signup' component={noAuth(SignupPage)} />
     <Route path='/users' name='users' component={UsersPage} />
     <Route path='/polls' name='polls' component={PollsPage} />
     <Route path='/users/:id' name='user' component={UserPage} />
     <Route path='/polls/:id' name='poll' component={PollPage} />
-    <Route path='/profile' name='admin-profile' component={AdminProfilePage} />
-    <Route path='/edit/:id' name='admin-edit' component={AdminEditPage} />
-    <Route path='/new' name='admin-new' component={AdminNewPage} />
+    <Route path='/profile' name='admin-profile' component={requireAuth(AdminProfilePage)} />
+    <Route path='/polls/:id/edit' name='admin-edit' component={requireAuth(AdminEditPage)} />
+    <Route path='/new' name='admin-new' component={requireAuth(AdminNewPage)} />
   </Route>
 )
