@@ -34,8 +34,7 @@ export default class Poll extends Component {
     }
 
     this.props.vote(this.props.poll.id, {
-      value: value,
-      isOther: other
+      value: value
     }).then(response => props.setMessage(flash.SUCCESS, response.message))
   }
 
@@ -56,8 +55,8 @@ export default class Poll extends Component {
     let nodes = (options || []).map((option, index) => {
       return (
         <div key={index}>
-          <input type="radio" id={`option-${index}`} name="option" value={option.value} />
-          <label htmlFor={`option-${index}`}>{option.value}</label>
+          <input type="radio" id={`option-${index}`} name="option" value={option} />
+          <label htmlFor={`option-${index}`}>{option}</label>
         </div>
       )
     })

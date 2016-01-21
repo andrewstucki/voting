@@ -13,7 +13,7 @@ class AdminNewPage extends Component {
 
   submitForm(poll) {
     let props = this.props
-    this.props.createPoll(poll).then(newPoll => {
+    this.props.createPoll(poll, newPoll => {
       props.dispatch(pushState(null, `/edit/${newPoll.id}`))
     })
   }

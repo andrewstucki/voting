@@ -8,12 +8,8 @@ export default class PollForm extends Component {
     this.doSubmit = this.doSubmit.bind(this)
     this.addOption = this.addOption.bind(this)
     this.changeOptionValue = this.changeOptionValue.bind(this)
-    this.changeOptionPublished = this.changeOptionPublished.bind(this)
     this.state = {
-      options: this.props.poll.options || [{
-        value: "",
-        published: true
-      }]
+      options: this.props.poll.options || [""]
     }
   }
 
@@ -49,29 +45,18 @@ export default class PollForm extends Component {
 
   changeOptionValue(index, value) {
     let newOptions = this.state.options.slice()
-    newOptions[index].value = value
-    this.setState({options: newOptions})
-  }
-
-  changeOptionPublished(index, published) {
-    let newOptions = this.state.options.slice()
-    newOptions[index].published = published
+    newOptions[index] = value
     this.setState({options: newOptions})
   }
 
   addOption(e) {
     e.preventDefault()
-    if (this.props.readOnlyOptions) return
     let newOptions = this.state.options.slice()
-    newOptions.push({
-      value: "",
-      published: true
-    })
+    newOptions.push("")
     this.setState({options: newOptions})
   }
 
   render() {
-    const readOnly = this.props.readOnlyOptions
     const options = this.state.options
     return (
       <div className="col-lg-12 poll-form">
@@ -90,7 +75,7 @@ export default class PollForm extends Component {
           </div>
           <div className="form-group" id="options">
           {options.map((option, index) =>
-            <OptionForm key={index} index={index} option={option} disabled={readOnly} onChangeValue={this.changeOptionValue} onChangePublished={this.changeOptionPublished} />
+            <OptionForm key={index} index={index} option={option} onChangeValue={this.changeOptionValue} />
           )}
           </div>
           <button className="btn btn-primary" onClick={this.addOption}>Add Option</button>
@@ -112,14 +97,5 @@ PollForm.propTypes = {
     allowOther: PropTypes.bool,
     options: PropTypes.array
   }).isRequired,
-  onSubmit: PropTypes.func.isRequired,
-  readOnlyOptions: PropTypes.bool
+  onSubmit: PropTypes.func.isRequired
 }
-// id: poll._id,
-// user: poll._user.email,
-// name: poll.name,
-// published: poll.published,
-// allowOther: poll.allowOther,
-// options: _.map(options, function(option) {
-//   return option.renderJson(admin);
-// })

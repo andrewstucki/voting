@@ -3,7 +3,10 @@ import 'isomorphic-fetch'
 import * as Constants from './constants'
 
 export function handleError(dispatch, constant, error) {
-  error.json().then(json => dispatch({ type: constant, error: json.message })).catch(() => dispatch({ type: constant, error: "JSON parser error" }))
+  if (process.env.NODE_ENV !== "production") console.log(error)
+  // this first if statement really shouldn't happen, it means we're getting an unknown error thrown somewhere in the call stack of api requests that isn't a user-controlled error
+  if (typeof error.json !== 'function') return dispatch({ type: constant, error: "An unknown error has occurred" })
+  error.json().then(json => dispatch({ type: constant, error: json.error })).catch(() => dispatch({ type: constant, error: "JSON parser error" }))
 }
 
 export function api(endpoint, userParams = {}, body = null) {
@@ -21,9 +24,10 @@ export function api(endpoint, userParams = {}, body = null) {
     headers: ajaxHeaders
   }
   if (body) {
-    payload = Object.assign(payload, {body: JSON.stringify(params)})
+    payload = Object.assign(payload, {body: JSON.stringify(body)})
   }
   return fetch(fullUrl, payload).then(response => {
+    console.log(response)
     if (response.status >= 400) {
       throw response;
     }

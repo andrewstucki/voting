@@ -65,7 +65,7 @@ userSchema.statics.signup = function(email, password, passwordConfirmation, skip
   var schema = this;
   return new promise(function(resolve, reject) {
     if (password !== passwordConfirmation)
-      return reject(new errors.ModelInvalid("Password confirmation does not match"));;
+      return reject(new errors.ModelInvalid("Password confirmation does not match"));
     if (!validator.isEmail(email))
       return reject(new errors.ModelInvalid("Invalid Email Address"));
     var params = {
@@ -172,13 +172,9 @@ userSchema.methods.createPoll = function(data) {
     published: !!data.published,
     allowOther: !!data.allowOther,
     name: data.name,
+    options: data.options || [],
+    answers: {},
     _user: this._id
-  });
-  _.each(data.options || [], function(option) {
-    poll.options.push(new Option({
-      value: option.value,
-      published: option.published
-    }));
   });
   return new promise(function(resolve, reject){
     return poll.save().then(function(poll) {
@@ -228,14 +224,7 @@ userSchema.methods.updatePoll = function(id, data) {
       if (data.name) poll.name = data.name;
       if (data.hasOwnProperty('allowOther')) poll.allowOther = data.allowOther;
       if (data.hasOwnProperty('published')) poll.published = data.published;
-      _.each(data.options || [], function(option) {
-        var updateOption = _.find(poll.options, function(pollOption) {
-          return pollOption.value === option.value;
-        });
-        if (!updateOption) return;
-        if (option.hasOwnProperty('published'))
-          updateOption.published = option.published;
-      });
+      if (data.hasOwnProperty('options')) poll.options = data.options;
       return poll.save().then(resolve).catch(function(err) {
         if (err.code === 11000) return reject(new errors.ModelInvalid("Invalid Poll"));
         return reject(new errors.DatabaseFailure(err.toString()));
@@ -294,38 +283,6 @@ userSchema.pre('save', function(next) {
 });
 
 // Polls
-var optionSchema = new mongoose.Schema({
-  published: {
-    type: Boolean,
-    default: true
-  },
-  isOther: {
-    type: Boolean,
-    default: false
-  },
-  value: {
-    type: String,
-    required: true,
-  },
-  count: {
-    type: Number,
-    default: 0
-  }
-});
-
-optionSchema.methods.renderJson = function(admin) {
-  if (admin) return {
-    published: this.published,
-    isOther: this.isOther,
-    value: this.value,
-    count: this.count
-  };
-
-  return {
-    value: this.value,
-    count: this.count
-  };
-};
 
 var pollSchema = new mongoose.Schema({
   _user: {
@@ -344,7 +301,8 @@ var pollSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  options: [optionSchema]
+  answers: mongoose.Schema.Types.Mixed,
+  options: [String]
 });
 
 pollSchema.statics.published = function() {
@@ -362,17 +320,15 @@ pollSchema.methods.vote = function(response) {
   var poll = this;
   return new promise(function(resolve, reject) {
     var option = _.find(poll.options, function(option) {
-      return option.value === response.value;
+      return option === response;
     });
-    if (response.isOther && !option) {
-      option = new optionSchema({
-        published: false,
-        isOther: true,
-        value: response.value
-      });
-      poll.options.push(option);
-    } else if (!option) return reject(new errors.ModelInvalid("Invalid Option"));
-    option.count++;
+    var value;
+    if (option) value = option;
+    else if (!option && poll.allowOther) value = response;
+    else return reject(new errors.ModelInvalid("Invalid Option"));
+    poll.answers[value] = poll.answers[value] || 1;
+    poll.answers[value]++;
+    poll.markModified('answers');
     poll.save().then(resolve).catch(function(err) {
       if (err.code === 11000) return reject(new errors.ModelInvalid("Invalid Poll"));
       return reject(new errors.DatabaseFailure(err.toString()));
@@ -382,26 +338,21 @@ pollSchema.methods.vote = function(response) {
 
 pollSchema.methods.renderJson = function(admin) {
   var poll = this;
-  var options = admin ? poll.options : _.filter(poll.options, function(option) {
-    return option.published && !option.isOther;
-  });
-  return {
+  var payload = {
     id: poll._id,
     user: poll._user.email,
     name: poll.name,
     published: poll.published,
     allowOther: poll.allowOther,
-    options: _.map(options, function(option) {
-      return option.renderJson(admin);
-    })
+    options: poll.options,
   };
+  if (admin) payload['answers'] = poll.answers;
+  return payload;
 };
 
-var Option = mongoose.model('Option', optionSchema);
 var Poll = mongoose.model('Poll', pollSchema);
 
 module.exports = {
   User: User,
-  Option: Option,
   Poll: Poll
 };

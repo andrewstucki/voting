@@ -3,7 +3,7 @@ import omit from 'lodash/object/omit'
 import { routerStateReducer as router } from 'redux-router'
 import { combineReducers } from 'redux'
 
-import { constants } from '../actions'
+import { constants, flash } from '../actions'
 
 function handleCache(state, entity, value) {
   let flagLoaded = false
@@ -76,11 +76,25 @@ function cache(state = { users: {}, polls: {}, pollsLoaded: false, usersLoaded: 
 function message(state = null, action) {
   const { type, value, error } = action
 
-  if (type === constants.RESET_MESSAGE) {
+  if (type === constants.RESET_MESSAGE || type === "@@reduxReactRouter/routerDidChange") { // reset every route change
     return null
   } else if (type === constants.SET_MESSAGE) {
     return value
+  } else if (type === constants.SIGNUP_SUCCESS) {
+    return {
+      type: flash.SUCCESS,
+      message: value.message
+    }
+  } else if (type === constants.VOTE_SUCCESS) {
+    return {
+      type: flash.SUCCESS,
+      message: "Thanks for your answer!"
+    }
   } else if (error) {
+    return {
+      type: flash.ERROR,
+      message: error
+    }
   }
 
   return state

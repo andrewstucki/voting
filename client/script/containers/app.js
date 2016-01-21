@@ -21,24 +21,24 @@ class App extends Component {
   }
 
   handleDismissClick(e) {
-    this.props.resetErrorMessage()
     e.preventDefault()
+    this.props.resetMessage()
   }
 
   preventDefault(e) {
     e.preventDefault()
   }
 
-  renderErrorMessage() {
-    const { errorMessage } = this.props
+  renderMessage() {
+    const { flash } = this.props
 
-    if (!errorMessage || !errorMessage.type) {
+    if (!flash || !flash.type || !flash.message) {
       return null
     }
 
     return (
-      <p style={{padding: 10}} className={`text-${errorMessage.type}`}>
-        <b>{errorMessage.message}</b>
+      <p style={{padding: 10}} className={`text-${flash.type}`}>
+        <b>{flash.message}</b>
         {' '}
         (<a href="#"
             onClick={this.handleDismissClick}>
@@ -137,7 +137,7 @@ class App extends Component {
             </div>
           </div>
         </div>
-        {this.renderErrorMessage()}
+        {this.renderMessage()}
         {this.header()}
         <div className="container">
           <div className="row">
@@ -151,7 +151,7 @@ class App extends Component {
 
 App.propTypes = {
   // Injected by React Redux
-  errorMessage: PropTypes.shape({
+  flash: PropTypes.shape({
     type: PropTypes.string,
     message: PropTypes.string
   }),
@@ -163,7 +163,7 @@ App.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    message: state.message,
+    flash: state.message,
     isAuthenticated: state.auth.isAuthenticated,
     currentUser: state.auth.user,
     url: state.router.location.pathname.substring(1)

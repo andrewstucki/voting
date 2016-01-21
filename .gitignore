@@ -4,3 +4,4 @@ npm-debug.log
 .env
 bower_components
 public
+coverage
