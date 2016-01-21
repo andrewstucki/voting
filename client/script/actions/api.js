@@ -23,5 +23,10 @@ export function api(endpoint, userParams = {}, body = null) {
   if (body) {
     payload = Object.assign(payload, {body: JSON.stringify(params)})
   }
-  return fetch(fullUrl, payload).then(response => response.json())
+  return fetch(fullUrl, payload).then(response => {
+    if (response.status >= 400) {
+      throw response;
+    }
+    return response.json()
+  })
 }
