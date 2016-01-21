@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { pushState } from 'redux-router'
-import { createPoll } from '../actions'
+import { admin } from '../actions'
 
 import PollForm from '../components/poll-form'
 
@@ -13,8 +13,7 @@ class AdminNewPage extends Component {
 
   submitForm(poll) {
     let props = this.props
-    this.props.createPoll(poll, function(newPollArray) {
-      let newPoll = Object.values(newPollArray)[0]
+    this.props.createPoll(poll).then(newPoll => {
       props.dispatch(pushState(null, `/edit/${newPoll.id}`))
     })
   }
@@ -27,5 +26,5 @@ class AdminNewPage extends Component {
 }
 
 export default connect(null, {
-  createPoll
+  createPoll: admin.createPoll
 })(AdminNewPage)

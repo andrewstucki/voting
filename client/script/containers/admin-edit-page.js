@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { loadPoll } from '../actions'
+import { polls } from '../actions'
 import PollForm from '../components/poll-form'
 
 class AdminEditPage extends Component {
@@ -22,7 +22,7 @@ class AdminEditPage extends Component {
 }
 
 function mapStateToProps(state) {
-  const { entities: {polls} } = state
+  const { session: { polls } } = state
 
   return {
     poll: polls[state.router.params.id] || {}
@@ -30,5 +30,5 @@ function mapStateToProps(state) {
 }
 
 export default connect(mapStateToProps, {
-  loadPoll
+  loadPoll: polls.load
 })(AdminEditPage)

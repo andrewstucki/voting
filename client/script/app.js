@@ -5,7 +5,7 @@ import React from 'react'
 import { render } from 'react-dom'
 import Root from './containers/root'
 import configureStore from './store/configureStore'
-import { callApi } from './middleware/api'
+import { api } from './actions'
 
 function initializeApplication(user) {
   let store
@@ -24,8 +24,4 @@ function initializeApplication(user) {
 }
 
 const token = localStorage.getItem("token")
-callApi('/profile', 'user', { 'X-Voting-Session': token || '' }).then(function(data) {
-  initializeApplication(Object.values(data.user)[0])
-}).catch(function(err) {
-  initializeApplication()
-})
+api('/profile', { authentication: token }).then(initializeApplication).catch(err => initializeApplication())

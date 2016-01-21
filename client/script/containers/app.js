@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { IndexLink, Link } from 'react-router'
 import { NavDropdown, MenuItem } from 'react-bootstrap'
 import { LinkContainer } from 'react-router-bootstrap'
-import { resetErrorMessage, logout } from '../actions'
+import { flash, auth } from '../actions'
 
 import NavLink from '../components/nav-link'
 
@@ -155,7 +155,7 @@ App.propTypes = {
     type: PropTypes.string,
     message: PropTypes.string
   }),
-  resetErrorMessage: PropTypes.func.isRequired,
+  resetMessage: PropTypes.func.isRequired,
   url: PropTypes.string.isRequired,
   // Injected by React Router
   children: PropTypes.node
@@ -163,7 +163,7 @@ App.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    errorMessage: state.errorMessage,
+    message: state.message,
     isAuthenticated: state.auth.isAuthenticated,
     currentUser: state.auth.user,
     url: state.router.location.pathname.substring(1)
@@ -171,6 +171,6 @@ function mapStateToProps(state) {
 }
 
 export default connect(mapStateToProps, {
-  resetErrorMessage,
-  logout
+  resetMessage: flash.resetMessage,
+  logout: auth.logout
 })(App)

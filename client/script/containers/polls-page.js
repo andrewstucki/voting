@@ -1,12 +1,8 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { loadPolls } from '../actions'
+import { polls } from '../actions'
 import PollLink from '../components/poll-link'
 import List from '../components/list'
-
-function loadData(props) {
-  props.loadPolls()
-}
 
 class PollsPage extends Component {
   constructor(props) {
@@ -15,24 +11,20 @@ class PollsPage extends Component {
   }
 
   componentWillMount() {
-    loadData(this.props)
+    this.props.loadPolls()
   }
 
   renderPoll(poll) {
     return (
-      <PollLink link="polls" poll={poll}
-            key={poll.id} />
+      <PollLink link="polls" poll={poll} key={poll.id} />
     )
   }
 
   render() {
-    const { polls, pollsPagination } = this.props
+    const { polls } = this.props
     return (
       <div>
-        <List renderItem={this.renderPoll}
-              items={polls}
-              loadingLabel={`Loading polls...`}
-              {...pollsPagination} />
+        <List renderItem={this.renderPoll} items={polls} loadingLabel={`Loading polls...`} />
       </div>
     )
   }
@@ -40,21 +32,17 @@ class PollsPage extends Component {
 
 PollsPage.propTypes = {
   polls: PropTypes.array.isRequired,
-  pollsPagination: PropTypes.object.isRequired,
   loadPolls: PropTypes.func.isRequired
 }
 
 function mapStateToProps(state) {
-  const { entities: {polls}, pagination: {polls: pollsPagination} } = state
-
-  let flattenedPolls = Object.values(polls)
+  const { cache: { polls } } = state
 
   return {
-    pollsPagination,
-    polls: flattenedPolls
+    polls: Object.values(polls)
   }
 }
 
 export default connect(mapStateToProps, {
-  loadPolls
+  loadPolls: polls.loadAll
 })(PollsPage)

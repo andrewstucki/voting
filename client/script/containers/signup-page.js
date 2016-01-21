@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { signup } from '../actions'
+import { auth } from '../actions'
 
 class SignupPage extends Component {
   constructor(props) {
@@ -8,8 +8,8 @@ class SignupPage extends Component {
     this.doSignup = this.doSignup.bind(this)
   }
 
-  doSignup(evt) {
-    evt.preventDefault()
+  doSignup(e) {
+    e.preventDefault()
     const email = document.getElementById("email").value
     const password = document.getElementById("password").value
     const confirmation = document.getElementById("password_confirmation").value
@@ -42,5 +42,5 @@ class SignupPage extends Component {
 }
 
 export default connect(null, {
-  signup
+  signup: auth.signup
 })(SignupPage)

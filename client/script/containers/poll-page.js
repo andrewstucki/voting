@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { loadPoll } from '../actions'
+import { polls } from '../actions'
 import Poll from '../components/poll'
 
 class PollPage extends Component {
@@ -17,7 +17,7 @@ class PollPage extends Component {
 }
 
 function mapStateToProps(state) {
-  const { entities: {polls} } = state
+  const { cache: { polls } } = state
 
   return {
     poll: polls[state.router.params.id] || {}
@@ -25,5 +25,5 @@ function mapStateToProps(state) {
 }
 
 export default connect(mapStateToProps, {
-  loadPoll
+  loadPoll: polls.load
 })(PollPage)

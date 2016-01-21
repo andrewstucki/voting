@@ -1,12 +1,8 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { loadUsers } from '../actions'
+import { users } from '../actions'
 import UserLink from '../components/user-link'
 import List from '../components/list'
-
-function loadData(props) {
-  props.loadUsers()
-}
 
 class UsersPage extends Component {
   constructor(props) {
@@ -15,24 +11,20 @@ class UsersPage extends Component {
   }
 
   componentWillMount() {
-    loadData(this.props)
+    this.props.loadUsers()
   }
 
   renderUser(user) {
     return (
-      <UserLink user={user}
-            key={user.id} />
+      <UserLink user={user} key={user.id} />
     )
   }
 
   render() {
-    const { users, usersPagination } = this.props
+    const { users } = this.props
     return (
       <div>
-        <List renderItem={this.renderUser}
-              items={users}
-              loadingLabel={`Loading users...`}
-              {...usersPagination} />
+        <List renderItem={this.renderUser} items={users} loadingLabel={`Loading users...`} />
       </div>
     )
   }
@@ -40,21 +32,17 @@ class UsersPage extends Component {
 
 UsersPage.propTypes = {
   users: PropTypes.array.isRequired,
-  usersPagination: PropTypes.object.isRequired,
   loadUsers: PropTypes.func.isRequired
 }
 
 function mapStateToProps(state) {
-  const { entities: {users}, pagination: {users: usersPagination} } = state
-
-  let flattenedUsers = Object.values(users)
+  const { cache: { users } } = state
 
   return {
-    usersPagination,
-    users: flattenedUsers
+    users: Object.values(users)
   }
 }
 
 export default connect(mapStateToProps, {
-  loadUsers
+  loadUsers: users.loadAll
 })(UsersPage)

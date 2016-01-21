@@ -160,7 +160,8 @@ router.get('/polls', function(req, res) {
 
 router.get('/polls/:id', function(req, res) {
   models.Poll.findOne({
-    _id: req.params.id
+    _id: req.params.id,
+    published: true
   }).populate('_user').then(function(poll) {
     if (!poll) return notFound(res, "Poll not found");
     return res.status(200).json(poll.renderJson());

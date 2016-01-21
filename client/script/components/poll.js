@@ -1,12 +1,11 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 
-import { vote, setErrorMessage } from '../actions'
+import { polls, flash } from '../actions'
 
 export default class Poll extends Component {
   constructor(props) {
     super(props)
-    console.log(props)
     this.doVote = this.doVote.bind(this)
   }
 
@@ -34,18 +33,10 @@ export default class Poll extends Component {
       value = document.querySelector('input[name="option"]:checked').value
     }
 
-    console.log(this.props.poll.id, {
-      value: value,
-      isOther: other
-    })
-
     this.props.vote(this.props.poll.id, {
       value: value,
       isOther: other
-    }, messagesArray => {
-      let message = Object.values(messagesArray)[0]
-      props.setErrorMessage({type: "success", message: message.message})
-    })
+    }).then(response => props.setMessage(flash.SUCCESS, response.message))
   }
 
   render() {
@@ -99,6 +90,6 @@ Poll.propTypes = {
 }
 
 export default connect(null, {
-  vote,
-  setErrorMessage
+  vote: polls.vote,
+  setMessage: flash.setMessage
 })(Poll)

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { login, setErrorMessage } from '../actions'
+import { auth, flash } from '../actions'
 
 class LoginPage extends Component {
   constructor(props) {
@@ -10,12 +10,12 @@ class LoginPage extends Component {
 
     this.doLogin = this.doLogin.bind(this)
     if (query.confirmed) {
-      this.props.setErrorMessage({type: "success", message: "Thanks for confirming your account, please log in below"})
+      this.props.setMessage(flash.SUCCESS, "Thanks for confirming your account, please log in below")
     }
   }
 
-  doLogin(evt) {
-    evt.preventDefault()
+  doLogin(e) {
+    e.preventDefault()
     const email = document.getElementById("email").value
     const password = document.getElementById("password").value
     this.props.login(email, password)
@@ -43,6 +43,6 @@ class LoginPage extends Component {
 }
 
 export default connect(null, {
-  login,
-  setErrorMessage
+  login: auth.login,
+  setMessage: flash.setMessage
 })(LoginPage)
