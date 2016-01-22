@@ -3,13 +3,13 @@ import mongoose from 'mongoose'
 import _ from 'underscore'
 import assert from 'assert'
 
-process.env.ENVIRONMENT = 'test'
+if (process.env.ENVIRONMENT !== "test") throw new Error('Run the tests using the test environment flag')
 
 import config from '../../server/config'
 import Factory from './support/factories'
 import { User, Poll } from '../../server/models'
 
-describe('api', () => {
+describe('api routes', () => {
   let server
 
   beforeEach(() => server = require('../../server/index'))
@@ -262,13 +262,6 @@ describe('api', () => {
       })
     })
   })
-
-  // router.patch('/admin/polls/:id', jsonParser, middleware.authenticate, function(req, res) {
-  //   req.user.updatePoll(req.params.id, req.body).then(function(poll) {
-  //     return res.status(200).json(poll.renderJson(true));
-  //   }).catch(handleError.bind(this, res));
-  // });
-  //
 
   describe('lacking authentication on authenticated endpoints', () => {
     it('get profile responds with a 401', (done) => {

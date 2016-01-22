@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server/index.js",
     "test": "ENVIRONMENT=test mocha --compilers js:babel-core/register --recursive ./test/*",
-    "coverage": "ENVIRONMENT=test babel-node ./node_modules/.bin/isparta cover ./node_modules/mocha/bin/_mocha --format html -- --compilers js:babel-core/register --recursive ./test/*"
+    "coverage": "ENVIRONMENT=test babel-node ./node_modules/.bin/isparta cover ./node_modules/mocha/bin/_mocha -- --compilers js:babel-core/register --recursive ./test/*"
   },
   "repository": {
     "type": "git",

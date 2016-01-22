@@ -26,19 +26,19 @@ app.use('/api/v1', router);
 
 var unauthorized = function(res, message) {
   return res.status(401).json({
-    error: message || "Unauthorized"
+    error: message || /* istanbul ignore next */ "Unauthorized"
   });
 };
 
 var notFound = function(res, message) {
   return res.status(404).json({
-    error: message || "Not Found"
+    error: message || /* istanbul ignore next */ "Not Found"
   });
 };
 
 var invalid = function(res, message) {
   return res.status(422).json({
-    error: message || "Invalid"
+    error: message || /* istanbul ignore next */ "Invalid"
   });
 };
 
@@ -49,6 +49,7 @@ var internalError = function(res) {
 }
 
 var handleError = function(res, err) {
+  /* istanbul ignore if */
   if (config.environment !== "test") {
     if (typeof err === "string") {
       console.log(err);
@@ -190,5 +191,6 @@ router.post('/polls/:id/vote', jsonParser, function(req, res) {
 });
 
 module.exports = app.listen(port, function() {
+  /* istanbul ignore if */
   if (config.environment !== 'test') console.log('Voting app listening on port ' + port + '!');
 });
