@@ -188,5 +188,5 @@ router.post('/polls/:id/vote', jsonParser, function(req, res) {
 });
 
 module.exports = app.listen(port, function() {
-  if (config.environment !== "test") console.log('Voting app listening on port ' + port + '!');
+  if (config.environment !== 'test') console.log('Voting app listening on port ' + port + '!');
 });

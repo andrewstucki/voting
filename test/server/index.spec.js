@@ -1,9 +1,8 @@
-let fs = require('fs')
-let request = require('supertest')
+import request from 'supertest'
 
-process.env.ENVIRONMENT = "test"
+process.env.ENVIRONMENT = 'test'
 
-let config = require("../../server/config")
+import config from '../../server/config'
 
 describe('api', () => {
   let server

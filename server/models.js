@@ -11,7 +11,7 @@ var _ = require('underscore');
 var config = require("./config");
 var errors = require("./errors");
 
-if (!process.env.MANDRILL_APIKEY) throw new Error("Mandrill API key required!");
+if (!process.env.MANDRILL_APIKEY && process.env.ENVIRONMENT !== "test") throw new Error("Mandrill API key required!");
 
 var baseUrl = process.env.BASE_URL || "http://localhost:3000";
 
@@ -44,9 +44,7 @@ var userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    index: {
-      unique: true
-    }
+    unique: true
   },
   password: {
     type: String,
@@ -75,7 +73,7 @@ userSchema.statics.signup = function(email, password, passwordConfirmation, skip
     };
     var user = new schema(params);
     user.save().then(function(user) {
-      if (!skipEmail) return user.sendConfirmation().then(resolve.bind(this, user));
+      if (!skipEmail) return user.sendConfirmation().then(resolve.bind(this, user)).catch(reject);
       return resolve(user);
     }).catch(function(err) {
       if (err.code === 11000) return reject(new errors.ModelInvalid("Email Address Already Taken"));
@@ -161,7 +159,7 @@ userSchema.methods.sendConfirmation = function() {
         }),
       async: false
     }, resolve.bind(this, user), function(err) {
-      reject(new errors.ApiClientFailure(err.toString()));
+      return reject(new errors.ApiClientFailure(err));
     });
   });
 };

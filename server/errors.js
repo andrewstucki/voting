@@ -1,21 +1,42 @@
 var util = require('util');
 
-var errorConstructor = function() {
-  var newError = function (message) {
-    Error.call(this);
-    this.message = message;
-  };
-  newError.prototype.toString = function(){
+var ApiClientFailure = function(message) {
+  Error.call(this);
+  this.message = message;
+};
+
+var NotFound = function(message) {
+  Error.call(this);
+  this.message = message;
+};
+
+var ModelInvalid = function(message) {
+  Error.call(this);
+  this.message = message;
+};
+
+var DatabaseFailure = function(message) {
+  Error.call(this);
+  this.message = message;
+};
+
+var Unauthorized = function(message) {
+  Error.call(this);
+  this.message = message;
+};
+
+var errorConstructor = function(type) {
+  type.prototype.toString = function(){
     return this.message;
   };
-  util.inherits(newError, Error);
-  return newError
+  util.inherits(type, Error);
+  return type
 }
 
 module.exports = {
-  ApiClientFailure: errorConstructor(),
-  NotFound: errorConstructor(),
-  ModelInvalid: errorConstructor(),
-  DatabaseFailure: errorConstructor(),
-  Unauthorized: errorConstructor()
+  ApiClientFailure: errorConstructor(ApiClientFailure),
+  NotFound: errorConstructor(NotFound),
+  ModelInvalid: errorConstructor(ModelInvalid),
+  DatabaseFailure: errorConstructor(DatabaseFailure),
+  Unauthorized: errorConstructor(Unauthorized)
 };
