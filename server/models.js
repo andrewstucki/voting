@@ -239,9 +239,9 @@ userSchema.methods.deletePoll = function(id) {
     Poll.remove({
       _user: user._id,
       _id: id
-    }).then(function(poll) {
-      if (!poll) return reject(new errors.NotFound("Poll not found"));
-      return resolve(poll);
+    }).then(function(response) {
+      if (!response.result || response.result.n !== 1) return reject(new errors.NotFound("Poll not found"));
+      return resolve(response);
     }).catch(function(err) {
       return reject(new errors.DatabaseFailure(err.toString()));
     });
@@ -324,6 +324,7 @@ pollSchema.methods.vote = function(response) {
     if (option) value = option;
     else if (!option && poll.allowOther) value = response;
     else return reject(new errors.ModelInvalid("Invalid Option"));
+    poll.answers = poll.answers || {};
     poll.answers[value] = poll.answers[value] || 1;
     poll.answers[value]++;
     poll.markModified('answers');

@@ -12,4 +12,13 @@ Factory.define('user', User, {
   sessionToken: () => hat()
 })
 
+Factory.define('poll', Poll, {
+  _user: Factory.assoc('user', '_id'),
+  name: Factory.sequence(n => `Poll ${n}`),
+  published: true,
+  allowOther: true,
+  answers: {},
+  options: []
+})
+
 export default Factory

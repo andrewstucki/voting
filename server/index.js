@@ -49,10 +49,12 @@ var internalError = function(res) {
 }
 
 var handleError = function(res, err) {
-  if (typeof err === "string") {
-    console.log(err);
-  } else {
-    console.log(err.toString());
+  if (config.environment !== "test") {
+    if (typeof err === "string") {
+      console.log(err);
+    } else {
+      console.log(err.toString());
+    }
   }
   if (err instanceof errors.NotFound) return notFound(res, err.toString());
   if (err instanceof errors.ModelInvalid) return invalid(res, err.toString());
