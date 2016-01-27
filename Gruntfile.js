@@ -118,5 +118,4 @@ module.exports = function(grunt) {
     'core',
     'less:default'
   ]);
-
 };

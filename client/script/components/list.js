@@ -19,7 +19,7 @@ export default class List extends Component {
 
     const isEmpty = items.length === 0
     if (isEmpty && isFetching) {
-      return <h2><i>{loadingLabel}</i></h2>
+      return <p><i>{loadingLabel}</i></p>
     }
 
     const isLastPage = !nextPageUrl
