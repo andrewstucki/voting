@@ -17,7 +17,7 @@ var authenticate = function(req, res, next) {
     return next();
   }).catch(function(err) {
     return res.status(500).json({
-      error: "Database error"
+      error: "Something went wrong"
     });
   });
 };

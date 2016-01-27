@@ -14,8 +14,8 @@ var config = {
   }
 };
 
-if (!(environment in config))
-  throw new Error("Invalid environment specified: " + environment + "!");
+/* istanbul skip next */
+if (!(environment in config)) throw new Error("Invalid environment specified: " + environment + "!");
 
 module.exports = _.extend({}, config[environment], {
   environment: environment

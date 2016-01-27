@@ -1,24 +1,23 @@
 import request from 'supertest'
-import mongoose from 'mongoose'
 import assert from 'assert'
-import nock from 'nock'
+import mongoose from 'mongoose'
 
 if (process.env.ENVIRONMENT !== "test") throw new Error('Run the tests using the test environment flag')
 
 import config from '../../server/config'
-import { User } from '../../server/models'
-import { ModelInvalid, ApiClientFailure } from '../../server/errors'
+import { User, Poll } from '../../server/models'
+import { ModelInvalid, ApiClientFailure, NotFound } from '../../server/errors'
+import queue from '../../server/queue'
 import Factory from './support/factories'
+
+require('./support/setup')
 
 describe('api models', () => {
   describe('User', () => {
-    before(done => {
-      if (mongoose.connection.db) return done()
-      mongoose.connect(config.db, done)
+    afterEach(done => {
+      queue.testMode.clear()
+      Poll.remove({}).then(() => User.remove({}).then(done.bind(this, null))).catch(done)
     })
-
-    after(done => mongoose.connection.db.dropDatabase(() => mongoose.connection.close(done)))
-    beforeEach(done => mongoose.connection.db.dropDatabase(done))
 
     it('clears the session token on logout', done => {
       Factory.create('user', (err, user) => {
@@ -26,6 +25,37 @@ describe('api models', () => {
         assert.notStrictEqual(user.sessionToken, undefined)
         user.logout().then(saved => {
           assert.strictEqual(saved.sessionToken, undefined)
+          done()
+        }).catch(done)
+      })
+    })
+
+    it('creates a new session token on login', done => {
+      Factory.create('user', { password: 'test' }, (err, user) => {
+        if (err) return done(err)
+        assert.notStrictEqual(user.sessionToken, undefined)
+        User.login(user.email, 'test').then(loggedInUser => {
+          assert.notEqual(loggedInUser.sessionToken, user.sessionToken)
+          done()
+        }).catch(done)
+      })
+    })
+
+    it('login returns a NotFound if the email is invalid', done => {
+      Factory.create('user', { password: 'test' }, (err, user) => {
+        if (err) return done(err)
+        User.login('randomemail@blah.com', 'test').then(() => done(new Error('unreachable'))).catch(err => {
+          assert(err instanceof NotFound, "Invalid email did not throw a NotFound")
+          done()
+        }).catch(done)
+      })
+    })
+
+    if('login returns a ModelInvalid on password mismatch', done => {
+      Factory.create('user', { password: 'test' }, (err, user) => {
+        if (err) return done(err)
+        User.login(user.email, 'nottest').then(() => done(new Error('unreachable'))).catch(err => {
+          assert(err instanceof ModelInvalid, "Invalid password did not throw a ModelInvalid")
           done()
         }).catch(done)
       })
@@ -61,34 +91,13 @@ describe('api models', () => {
       })
 
       it('sends an email for confirming users', done => {
-        let mandrill = nock('https://mandrillapp.com')
-          .post('/api/1.0/messages/send.json')
-          .reply(200)
-
-        User.signup('test@test.com', 'test', 'test').then(user => {
-          assert(user._id instanceof mongoose.Types.ObjectId, "Id is not an ObjectId")
-          assert.strictEqual(user.email, 'test@test.com')
-          assert(typeof user.password === 'string', "Password is not a String")
-          assert(!user.confirmed, "User is not confirmed")
-          mandrill.done()
-          done()
-        }).catch(done)
-      })
-
-      it('throws an ApiClientFailure error if email sending fails', done => {
-        let mandrill = nock('https://mandrillapp.com')
-          .post('/api/1.0/messages/send.json')
-          .reply(401, {
-            'error': 'test'
-          })
-
+        assert.equal(queue.testMode.jobs.length, 0)
         User.signup('test@test.com', 'test', 'test').then(() => {
-          mandrill.done()
-          done(new Error('unreachable'))
-        }).catch(err => {
-          assert(err instanceof ApiClientFailure, 'Error is not an ApiClientFailure')
-          mandrill.done()
+          assert.equal(queue.testMode.jobs.length, 1)
+          assert.equal(queue.testMode.jobs[0].type, 'email')
           done()
+        }).catch(err => {
+          done(new Error('unreachable'))
         }).catch(done)
       })
     })

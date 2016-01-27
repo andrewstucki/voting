@@ -8,11 +8,17 @@ if (process.env.ENVIRONMENT !== "test") throw new Error('Run the tests using the
 import config from '../../server/config'
 import Factory from './support/factories'
 import { User, Poll } from '../../server/models'
+import queue from '../../server/queue'
+
+require('./support/setup')
 
 describe('api routes', () => {
   let server
 
-  beforeEach(() => server = require('../../server/index'))
+  beforeEach(() => {
+    queue.testMode.clear()
+    server = require('../../server/index')
+  })
 
   afterEach(() => server.close())
 
@@ -66,6 +72,13 @@ describe('api routes', () => {
       })
     })
 
+    it('returns a 404 when getting a poll with an invalid id', done => {
+      request(server)
+        .get(`/api/v1/polls/invalid`)
+        .expect('Content-Type', /json/)
+        .expect(404, done)
+    })
+
     it('returns a 201 for a successful vote', done => {
       Factory.create('poll', { options: ['foo', 'bar'], allowOther: false }, (err, poll) => {
         if (err) return done(err)
@@ -97,6 +110,33 @@ describe('api routes', () => {
           .expect('Content-Type', /json/)
           .expect(201, done)
       })
+    })
+
+    it('returns a 404 for a vote for an invalid poll id', done => {
+      request(server)
+        .post(`/api/v1/polls/invalid/vote`)
+        .send({ value: 'baz' })
+        .expect('Content-Type', /json/)
+        .expect(404, done)
+    })
+
+    it('returns a 404 for a vote on a poll that is unpublished', done => {
+      Factory.create('poll', { published: false }, (err, poll) => {
+        if (err) return done(err)
+        request(server)
+          .post(`/api/v1/polls/${poll._id}/vote`)
+          .send({ value: 'baz' })
+          .expect('Content-Type', /json/)
+          .expect(404, done)
+      })
+    })
+
+    it('returns a 404 for a vote with a valid objectid, but not matching any records', done => {
+      request(server)
+        .post(`/api/v1/polls/56a869dec0c4f0af1813db1c/vote`)
+        .send({ value: 'baz' })
+        .expect('Content-Type', /json/)
+        .expect(404, done)
     })
   })
 

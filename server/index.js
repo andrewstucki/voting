@@ -14,6 +14,11 @@ var app = express();
 var jsonParser = bodyParser.json();
 var port = process.env.PORT || config.port;
 
+var queue = require('./queue');
+var email = require('./workers/email');
+
+queue.process('email', email);
+
 app.use(express.static('public'));
 app.get(/^\/(users|login|signup|polls|edit|new|profile).*/, function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../public/index.html'));
@@ -169,6 +174,7 @@ router.get('/polls/:id', function(req, res) {
     if (!poll) return notFound(res, "Poll not found");
     return res.status(200).json(poll.renderJson());
   }).catch(function(err) {
+    if (err.name === 'CastError') return notFound(res, "Poll not found")
     console.log(err.toString());
     return internalError(res);
   });
@@ -176,7 +182,8 @@ router.get('/polls/:id', function(req, res) {
 
 router.post('/polls/:id/vote', jsonParser, function(req, res) {
   models.Poll.findOne({
-    _id: req.params.id
+    _id: req.params.id,
+    published: true,
   }).then(function(poll) {
     if (!poll) return notFound(res, "Poll not found");
     return poll.vote(req.body.value).then(function(poll) {
@@ -185,6 +192,7 @@ router.post('/polls/:id/vote', jsonParser, function(req, res) {
       });
     }).catch(handleError.bind(this, res));
   }).catch(function(err) {
+    if (err.name === 'CastError') return notFound(res, "Poll not found")
     console.log(err.toString());
     return internalError(res);
   });
