@@ -3,8 +3,6 @@ import assert from 'assert'
 import mocks from 'node-mocks-http'
 import { EventEmitter } from 'events'
 
-if (process.env.ENVIRONMENT !== "test") throw new Error('Run the tests using the test environment flag')
-
 import config from '../../server/config'
 import { ModelInvalid, ApiClientFailure } from '../../server/errors'
 import { Poll, User } from '../../server/models'

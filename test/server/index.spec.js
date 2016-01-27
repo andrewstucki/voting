@@ -3,8 +3,6 @@ import mongoose from 'mongoose'
 import _ from 'underscore'
 import assert from 'assert'
 
-if (process.env.ENVIRONMENT !== "test") throw new Error('Run the tests using the test environment flag')
-
 import config from '../../server/config'
 import Factory from './support/factories'
 import { User, Poll } from '../../server/models'

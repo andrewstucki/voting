@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { Link } from 'react-router'
 
-export default class EditPoll extends Component {
+export default class PollLink extends Component {
   render() {
     const { poll: { id, name }, link } = this.props
 
@@ -15,7 +15,7 @@ export default class EditPoll extends Component {
   }
 }
 
-EditPoll.propTypes = {
+PollLink.propTypes = {
   poll: PropTypes.shape({
     id: PropTypes.string.isRequired,
     user: PropTypes.string.isRequired,
