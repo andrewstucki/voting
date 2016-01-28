@@ -25,6 +25,10 @@ class SignupPage extends Component {
             <input className="form-control" id="email" name="email" placeholder="john.smith@example.com" required />
           </div>
           <div className="form-group">
+            <label htmlFor="username">Enter your desired username.</label>
+            <input className="form-control" id="username" name="username" placeholder="johnsmith" required />
+          </div>
+          <div className="form-group">
             <label htmlFor="password">Enter your desired password.</label>
             <input className="form-control" id="password" name="password" placeholder="********" type="password" required />
           </div>
@@ -33,7 +37,7 @@ class SignupPage extends Component {
             <input className="form-control" id="password_confirmation" name="password_confirmation" placeholder="********" type="password" required />
           </div>
           <div className="form-buttons">
-            <button className="btn btn-success" type="submit" onClick={this.doSignup}>Submit</button>
+            <button className="btn btn-block btn-success" type="submit" onClick={this.doSignup}>Submit</button>
           </div>
         </form>
       </div>

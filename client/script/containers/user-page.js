@@ -7,7 +7,7 @@ class UserPage extends Component {
   constructor(props) {
     super(props)
     this.props.loadUser(this.props.params.id)
-    if (!this.props.pollsLoaded) this.props.loadPolls()
+    this.props.loadPolls()
   }
 
   render() {
@@ -18,12 +18,11 @@ class UserPage extends Component {
 }
 
 function mapStateToProps(state) {
-  const { cache: { users, polls, pollsLoaded } } = state
+  const { cache: { users, polls } } = state
 
   return {
     user: users[state.router.params.id] || {},
-    polls: Object.values(polls).filter(poll => poll.user.id === state.router.params.id),
-    pollsLoaded
+    polls: Object.values(polls).filter(poll => poll.user.id === state.router.params.id)
   }
 }
 

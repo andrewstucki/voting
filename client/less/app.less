@@ -87,6 +87,129 @@
 
 //users
 
+.user-profile {
+  text-align: center;
+}
+
+.user-contact {
+  width: 100%;
+  text-align: left;
+}
+
 .user-avatar {
   border-radius: 100%;
+}
+
+.user-full-name {
+  font-size: 26px;
+  line-height: 30px;
+  width: 100%;
+  margin: 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.user-username {
+  font-size: 18px;
+  line-height: 22px;
+  font-weight: 300;
+  width: 100%;
+  margin: 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+//badges
+.label-as-badge {
+  border-radius: 1em;
+}
+//buttons
+@btn-digg-color:              #fff;
+@btn-digg-bg:                 #34495e;
+@btn-digg-border:             darken(@btn-digg-bg, 5%);
+
+@btn-reddit-color:              #fff;
+@btn-reddit-bg:                 #ff5700;
+@btn-reddit-border:             darken(@btn-reddit-bg, 5%);
+
+@btn-linkedin-color:              #fff;
+@btn-linkedin-bg:                 #0077b5;
+@btn-linkedin-border:             darken(@btn-linkedin-bg, 5%);
+
+@btn-github-color:              #333;
+@btn-github-bg:                 #fff;
+@btn-github-border:             #ccc;
+
+@btn-facebook-color:              #fff;
+@btn-facebook-bg:                 #3b5998;
+@btn-facebook-border:             darken(@btn-facebook-bg, 5%);
+
+@btn-twitter-color:                 #fff;
+@btn-twitter-bg:                    #55acee;
+@btn-twitter-border:                darken(@btn-twitter-bg, 5%);
+
+@btn-google-color:               #fff;
+@btn-google-bg:                  #009688;
+@btn-google-border:              darken(@btn-google-bg, 5%);
+
+.btn-reddit {
+  .button-variant(@btn-reddit-color; @btn-reddit-bg; @btn-reddit-border);
+}
+.btn-digg {
+  .button-variant(@btn-digg-color; @btn-digg-bg; @btn-digg-border);
+}
+.btn-linkedin {
+  .button-variant(@btn-linkedin-color; @btn-linkedin-bg; @btn-linkedin-border);
+}
+.btn-github {
+  .button-variant(@btn-github-color; @btn-github-bg; @btn-github-border);
+}
+.btn-facebook {
+  .button-variant(@btn-facebook-color; @btn-facebook-bg; @btn-facebook-border);
+}
+.btn-twitter {
+  .button-variant(@btn-twitter-color; @btn-twitter-bg; @btn-twitter-border);
+}
+.btn-google {
+  .button-variant(@btn-google-color; @btn-google-bg; @btn-google-border);
+}
+
+.btn-share {
+  margin-right: 10px;
+}
+
+//polls
+
+.poll-header {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #e5e5e5;
+  text-align: center
+}
+
+.poll-form {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 20px;
+  text-align: center;
+}
+
+.vote-form {
+  margin: 0 auto;
+  padding: 10px;
+  width: 75%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.vote-submit {
+  margin-top: 20px;
+}
+
+#other-value {
+  margin-left: 10px;
+}
+
+.poll-results {
+  text-align: center
 }

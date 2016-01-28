@@ -90,13 +90,17 @@ module.exports = function(grunt) {
     },
 
     watch: {
+      options: {
+        livereload: true,
+      },
       scripts: {
         files: ['<%= config.src %>/**/*.js'],
         tasks: ['browserify'],
-        options: {
-          livereload: true,
-        },
       },
+      styles: {
+        files: ['<%= config.src %>/**/*.less'],
+        tasks: ['less:default']
+      }
     },
   });
 
