@@ -33,7 +33,7 @@ describe('api routes', () => {
             .expect('Content-Type', /json/)
             .expect(payload => {
               assert(_.every(payload.body, element => element.hasOwnProperty('id') && typeof element.id === 'string'), 'Not all elements have an id')
-              assert(_.every(payload.body, element => element.hasOwnProperty('user') && typeof element.user === 'string'), 'Not all elements have a user')
+              assert(_.every(payload.body, element => element.hasOwnProperty('user') && typeof element.user === 'object'), 'Not all elements have a user')
               const expected = _.map(polls, poll => _.omit(poll.renderJson(), ['id', 'user']))
               const actual = _.map(payload.body, element => _.omit(element, ['id', 'user']))
               assert(_.isEqual(actual, expected), 'Payload did not match')
@@ -61,7 +61,7 @@ describe('api routes', () => {
           .expect('Content-Type', /json/)
           .expect(payload => {
             assert(payload.body.hasOwnProperty('id') && typeof payload.body.id === 'string', 'Payload is missing id')
-            assert(payload.body.hasOwnProperty('user') && typeof payload.body.user === 'string', 'Payload is missing user')
+            assert(payload.body.hasOwnProperty('user') && typeof payload.body.user === 'object', 'Payload is missing user')
             const expected = _.omit(poll.renderJson(), ['id', 'user'])
             const actual = _.omit(payload.body, ['id', 'user'])
             assert(_.isEqual(actual, expected), 'Payload did not match')
@@ -170,7 +170,7 @@ describe('api routes', () => {
             .expect('Content-Type', /json/)
             .expect(payload => {
               assert(_.every(payload.body, element => element.hasOwnProperty('id') && typeof element.id === 'string'), 'Not all elements have an id')
-              assert(_.every(payload.body, element => element.hasOwnProperty('user') && typeof element.user === 'string'), 'Not all elements have a user')
+              assert(_.every(payload.body, element => element.hasOwnProperty('user') && typeof element.user === 'object'), 'Not all elements have a user')
               const expected = _.map(publishedPolls.concat(unpublishedPolls), poll => _.omit(poll.renderJson(true), ['id', 'user', 'answers']))
               const actual = _.map(payload.body, element => _.omit(element, ['id', 'user', 'answers']))
               assert(_.isEqual(actual, expected), 'Payload did not match')
@@ -246,7 +246,7 @@ describe('api routes', () => {
           .expect('Content-Type', /json/)
           .expect(payload => {
             assert(payload.body.hasOwnProperty('id') && typeof payload.body.id == 'string', 'Id missing from payload')
-            assert(payload.body.user === admin.email, 'User missing from payload')
+            assert(payload.body.user.email === admin.email, 'User missing from payload')
             const expected = _.omit(params, ['_user', 'user', 'answers'])
             const actual = _.omit(payload.body, ['user', 'answers', 'id'])
             assert(_.isEqual(actual, expected), 'Payload does not match')
@@ -284,7 +284,7 @@ describe('api routes', () => {
             .expect('Content-Type', /json/)
             .expect(payload => {
               assert(payload.body.hasOwnProperty('id') && typeof payload.body.id == 'string', 'Id missing from payload')
-              assert(payload.body.user === admin.email, 'User missing from payload')
+              assert(payload.body.user.email === admin.email, 'User missing from payload')
               const expected = _.omit(params, ['_user', 'user', 'answers'])
               const actual = _.omit(payload.body, ['user', 'answers', 'id'])
               assert(_.isEqual(actual, expected), 'Payload does not match')

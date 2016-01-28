@@ -3,14 +3,15 @@ import { Link } from 'react-router'
 
 export default class UserLink extends Component {
   render() {
-    const { id, email } = this.props.user
+    const { id, email, gravatarUrl } = this.props.user
 
     return (
-      <div className="User">
-        <Link to={`/users/${id}`}>
-          {email}
-        </Link>
-      </div>
+      <Link to={`/users/${id}`} className="list-group-item">
+        <div className="item-link">
+          <img className="icon-thumbnail" src={gravatarUrl + "?s=50&d=mm"} />
+          <h4 className="user-item">{email}</h4>
+        </div>
+      </Link>
     )
   }
 }
@@ -18,6 +19,7 @@ export default class UserLink extends Component {
 UserLink.propTypes = {
   user: PropTypes.shape({
     id: PropTypes.string.isRequired,
-    email: PropTypes.string.isRequired
+    email: PropTypes.string.isRequired,
+    gravatarUrl: PropTypes.string.isRequired
   }).isRequired
 }

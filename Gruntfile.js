@@ -87,7 +87,17 @@ module.exports = function(grunt) {
           '<%= config.dest %>/assets/scripts/app.js': ['<%= config.dest %>/assets/scripts/app.js']
         }
       }
-    }
+    },
+
+    watch: {
+      scripts: {
+        files: ['<%= config.src %>/**/*.js'],
+        tasks: ['browserify'],
+        options: {
+          livereload: true,
+        },
+      },
+    },
   });
 
   grunt.loadNpmTasks('grunt-eslint');
@@ -96,6 +106,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-bump');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.registerTask('production', 'Set production environment variables', function() {
     process.env.NODE_ENV = 'production';
@@ -116,6 +127,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('default', [
     'core',
-    'less:default'
+    'less:default',
+    'watch'
   ]);
 };

@@ -28,7 +28,7 @@ export default class List extends Component {
     }
 
     return (
-      <div>
+      <div className="list-group">
         {items.map(renderItem)}
         {pageCount > 0 && !isLastPage && this.renderLoadMore()}
       </div>

@@ -139,7 +139,7 @@ class App extends Component {
         </div>
         {this.renderMessage()}
         {this.header()}
-        <div className="container">
+        <div className="container main-container">
           <div className="row">
             {children}
           </div>

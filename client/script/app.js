@@ -7,6 +7,8 @@ import Root from './containers/root'
 import configureStore from './store/configureStore'
 import { api } from './actions'
 
+if (process.env.NODE_ENV !== 'production') document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js"></' + 'script>')
+
 function initializeApplication(user) {
   let store
   if (user) {

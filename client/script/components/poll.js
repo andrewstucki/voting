@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react'
+import { Link } from 'react-router'
 import { connect } from 'react-redux'
 
 import { polls, flash } from '../actions'
@@ -39,7 +40,8 @@ export default class Poll extends Component {
   }
 
   render() {
-    const { id, name, allowOther, options } = this.props.poll
+    const { id, name, allowOther, options, user } = this.props.poll
+    const { email: user_email, id: user_id } = user || {}
 
     let otherNode = ''
     if (allowOther) {
@@ -63,6 +65,7 @@ export default class Poll extends Component {
 
     return (
       <div className="col-lg-12 poll-form">
+        Created by: <Link to={`/users/${user_id}`}>{user_email}</Link>
         <form name="vote-form">
           <div id="options">
             {nodes}
@@ -80,7 +83,10 @@ export default class Poll extends Component {
 Poll.propTypes = {
   poll: PropTypes.shape({
     id: PropTypes.string,
-    user: PropTypes.string,
+    user: PropTypes.shape({
+      email: PropTypes.string,
+      id: PropTypes.string
+    }),
     name: PropTypes.string,
     published: PropTypes.bool,
     allowOther: PropTypes.bool,

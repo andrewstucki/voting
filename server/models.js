@@ -4,6 +4,7 @@ var promise = require('promise');
 var validator = require('validator');
 var hat = require('hat');
 var _ = require('underscore');
+var md5 = require('md5');
 
 var config = require("./config");
 var errors = require("./errors");
@@ -30,7 +31,8 @@ var userSchema = new mongoose.Schema({
     require: true
   },
   confirmationToken: String,
-  sessionToken: String
+  sessionToken: String,
+  gravatarUrl: String
 });
 
 userSchema.statics.signup = function(email, password, passwordConfirmation, skipEmail) {
@@ -212,14 +214,16 @@ userSchema.methods.renderToken = function() {
   return {
     id: this._id,
     email: this.email,
-    token: this.sessionToken
+    token: this.sessionToken,
+    gravatarUrl: this.gravatarUrl
   };
 };
 
 userSchema.methods.renderJson = function() {
   return {
     id: this._id,
-    email: this.email
+    email: this.email,
+    gravatarUrl: this.gravatarUrl
   };
 };
 
@@ -229,6 +233,8 @@ userSchema.pre('save', function(next) {
   var user = this;
   if (!user.confirmed && !user.confirmationToken)
     user.confirmationToken = hat();
+  if (!user.gravatarUrl)
+    user.gravatarUrl = "https://gravatar.com/avatar/" + md5(user.email.trim().toLowerCase());
   if (!user.isModified('password')) return next();
   bcrypt.genSalt(10, function(err, salt) {
     if (err) return next(err);
@@ -299,7 +305,10 @@ pollSchema.methods.renderJson = function(admin) {
   var poll = this;
   var payload = {
     id: poll._id,
-    user: poll._user.email,
+    user: {
+      id: poll._user.id,
+      email: poll._user.email
+    },
     name: poll.name,
     published: poll.published,
     allowOther: poll.allowOther,

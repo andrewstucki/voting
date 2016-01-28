@@ -101,6 +101,17 @@ router.get("/users/:id", function(req, res) {
   }).catch(handleError.bind(this, res));
 });
 
+router.get("/users/:id/polls", function(req, res) {
+  models.Poll.find({
+    _user: req.params.id,
+    published: true
+  }).then(function(polls) {
+    return res.status(200).json(_.map(polls, function(poll) {
+      return poll.renderJson()
+    }));
+  }).catch(handleError.bind(this, res));
+});
+
 router.get("/confirm/:token", function(req, res) {
   models.User.confirm(req.params.token).then(function(user) {
     return res.redirect('/login?confirmed=true');

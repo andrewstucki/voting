@@ -6,11 +6,13 @@ export default class PollLink extends Component {
     const { poll: { id, name }, link } = this.props
 
     return (
-      <div className="Poll">
-        <Link to={`/${link}/${id}`}>
-          {name}
+        <Link to={`/${link}/${id}`} className="list-group-item">
+          <div className="item-link">
+            <h4 className="list-group-item-heading">{name}</h4>
+            <p className="list-group-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p>
+            <span className="badge">14 responses</span>
+          </div>
         </Link>
-      </div>
     )
   }
 }
