@@ -9,6 +9,7 @@ var md5 = require('md5');
 var config = require("./config");
 var errors = require("./errors");
 var queue = require("./queue");
+var socket = require("./socket");
 
 // initialize mongo
 mongoose.Promise = promise;
@@ -291,17 +292,20 @@ pollSchema.methods.vote = function(response) {
     else if (!option && poll.allowOther) value = response;
     else return reject(new errors.ModelInvalid("Invalid Option"));
     poll.answers = poll.answers || {};
-    poll.answers[value] = poll.answers[value] || 1;
-    poll.answers[value]++;
+    poll.answers[value] = poll.answers[value] || 0;
+    var count = ++poll.answers[value];
     poll.markModified('answers');
-    poll.save().then(resolve).catch(function(err) {
+    poll.save().then(function(updated) {
+      resolve(updated);
+      socket.updateVote(poll._id, value, count);
+    }).catch(function(err) {
       if (err.code === 11000) return reject(new errors.ModelInvalid("Invalid Poll"));
       return reject(new errors.DatabaseFailure(err.toString()));
     });
   });
 };
 
-pollSchema.methods.renderJson = function(admin) {
+pollSchema.methods.renderJson = function() {
   var poll = this;
   var payload = {
     id: poll._id,
@@ -314,8 +318,15 @@ pollSchema.methods.renderJson = function(admin) {
     allowOther: poll.allowOther,
     options: poll.options,
   };
-  if (admin) payload['answers'] = poll.answers;
   return payload;
+};
+
+pollSchema.methods.renderResults = function() {
+  var poll = this;
+  return {
+    id: poll._id,
+    answers: poll.answers
+  };
 };
 
 var Poll = mongoose.model('Poll', pollSchema);

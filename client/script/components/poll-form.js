@@ -35,6 +35,8 @@ export default class PollForm extends Component {
     const published = document.getElementById("published").checked
     const allowOther = document.getElementById("allow-other").checked
 
+    //Do validation here
+    
     this.props.onSubmit({
       name,
       published,
@@ -59,28 +61,41 @@ export default class PollForm extends Component {
   render() {
     const options = this.state.options
     return (
-      <div className="col-lg-12 poll-form">
-        <form name="poll-form">
+      <div>
+        <form name="poll-creation-form">
           <div className="form-group">
-            <label htmlFor="name">Enter the name of the poll you would like to create.</label>
-            <input className="form-control" id="name" name="name" placeholder="My Awesome Poll" value={this.props.poll.name} required />
+            <label className="col-lg-3 control-label" htmlFor="name">Name</label>
+            <div className="col-lg-9">
+              <input className="form-control" id="name" name="name" placeholder="My Awesome Poll" value={this.props.poll.name} required />
+            </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="published">Published?</label>
-            <input className="form-control" id="published" name="published" type="checkbox" defaultChecked checked={this.props.poll.published} />
+          <div class="form-group">
+            <div class="col-lg-offset-3 col-lg-9">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" id="published" name="published" defaultChecked checked={this.props.poll.published} /> Published?
+                </label>
+              </div>
+            </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="allow-other">Allow Additional Fill-in "Other" Response?</label>
-            <input className="form-control" id="allow-other" name="allow-other" type="checkbox" defaultChecked checked={this.props.poll.allowOther} />
+          <div class="form-group">
+            <div class="col-lg-offset-3 col-lg-9">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" id="allow-other" name="allow-other" defaultChecked checked={this.props.poll.allowOther} /> Allow Additional Fill-in "Other" Response?
+                </label>
+              </div>
+            </div>
           </div>
           <div className="form-group" id="options">
           {options.map((option, index) =>
             <OptionForm key={index} index={index} option={option} onChangeValue={this.changeOptionValue} />
           )}
           </div>
-          <button className="btn btn-primary" onClick={this.addOption}>Add Option</button>
+          <button className="btn btn-block btn-primary" onClick={this.addOption}>Add Option</button>
+          <hr />
           <div className="form-buttons">
-            <button className="btn btn-success" type="submit" onClick={this.doSubmit}>Submit</button>
+            <button className="btn btn-block btn-success" type="submit" onClick={this.doSubmit}>Submit</button>
           </div>
         </form>
       </div>

@@ -36,7 +36,7 @@ class User extends Component {
     if (polls.length === 0) {
       polls = (
         <div className="list-group-item">
-          <h4 class="list-group-item-heading">N/A</h4>
+          <h4 className="list-group-item-heading">N/A</h4>
         </div>
       )
     }

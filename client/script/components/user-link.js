@@ -9,7 +9,10 @@ export default class UserLink extends Component {
       <Link to={`/users/${id}`} className="list-group-item">
         <div className="item-link">
           <img className="icon-thumbnail user-avatar" src={gravatarUrl + "?s=50&d=mm"} />
-          <h4 className="user-item">{email}</h4>
+          <div className="user-item">
+            <h4 className="list-group-item-heading">{email}</h4>
+            <p className="list-group-item-text">{email}</p>
+          </div>
         </div>
       </Link>
     )

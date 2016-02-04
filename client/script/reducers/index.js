@@ -60,14 +60,22 @@ function auth(state = { isAuthenticated: false, user: {} }, action) {
   }
 }
 
-function cache(state = { users: {}, polls: {}, pollsLoaded: false, usersLoaded: false }, action) {
+function cache(state = { users: {}, polls: {}, results: {}, pollsLoaded: false, usersLoaded: false }, action) {
   const { type, entity, value } = action
   switch(type) {
   case constants.POLL_SUCCESS:
   case constants.POLLS_SUCCESS:
   case constants.USER_SUCCESS:
   case constants.USERS_SUCCESS:
+  case constants.RESULTS_SUCCESS:
     return handleCache(state, entity, value)
+  case constants.VOTE_UPDATE:
+    const { id, count } = action
+    let newCount = {}
+    let mergeResult = {}
+    newCount[value] = count
+    mergeResult[id] = {id: id, answers: Object.assign({}, state.results[id].answers, newCount)}
+    return Object.assign({}, state, { results: Object.assign({}, state.results, mergeResult) })
   default:
     return state
   }
@@ -100,12 +108,20 @@ function message(state = null, action) {
   return state
 }
 
-const rootReducer = combineReducers({
+function subscriptions(state = [], action) {
+  if (action.type === constants.VOTE_SUBSCRIBE) {
+    let newState = state.slice()
+    newState.push(action.id)
+    return newState
+  }
+  return state
+}
+
+export default combineReducers({
   cache,
   session,
   auth,
   message,
+  subscriptions,
   router
 })
-
-export default rootReducer

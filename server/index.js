@@ -1,5 +1,6 @@
 require('dotenv').load();
 
+var server = require('http').createServer();
 var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('underscore');
@@ -9,6 +10,7 @@ var models = require('./models');
 var config = require('./config');
 var middleware = require('./middleware');
 var errors = require('./errors');
+var socket = require('./socket');
 
 var app = express();
 var jsonParser = bodyParser.json();
@@ -101,17 +103,6 @@ router.get("/users/:id", function(req, res) {
   }).catch(handleError.bind(this, res));
 });
 
-router.get("/users/:id/polls", function(req, res) {
-  models.Poll.find({
-    _user: req.params.id,
-    published: true
-  }).then(function(polls) {
-    return res.status(200).json(_.map(polls, function(poll) {
-      return poll.renderJson()
-    }));
-  }).catch(handleError.bind(this, res));
-});
-
 router.get("/confirm/:token", function(req, res) {
   models.User.confirm(req.params.token).then(function(user) {
     return res.redirect('/login?confirmed=true');
@@ -138,27 +129,27 @@ router.post("/signup", jsonParser, function(req, res) {
 // admin
 router.post('/admin/polls', jsonParser, middleware.authenticate, function(req, res) {
   req.user.createPoll(req.body).then(function(poll) {
-    return res.status(201).json(poll.renderJson(true));
+    return res.status(201).json(poll.renderJson());
   }).catch(handleError.bind(this, res));
 });
 
 router.get('/admin/polls', middleware.authenticate, function(req, res) {
   req.user.getPolls().then(function(polls) {
     return res.status(200).json(_.map(polls, function(poll) {
-      return poll.renderJson(true);
+      return poll.renderJson();
     }));
   }).catch(handleError.bind(this, res));
 });
 
 router.get('/admin/polls/:id', middleware.authenticate, function(req, res) {
   req.user.getPoll(req.params.id).then(function(poll) {
-    return res.status(200).json(poll.renderJson(true));
+    return res.status(200).json(poll.renderJson());
   }).catch(handleError.bind(this, res));
 });
 
 router.patch('/admin/polls/:id', jsonParser, middleware.authenticate, function(req, res) {
   req.user.updatePoll(req.params.id, req.body).then(function(poll) {
-    return res.status(200).json(poll.renderJson(true));
+    return res.status(200).json(poll.renderJson());
   }).catch(handleError.bind(this, res));
 });
 
@@ -191,6 +182,20 @@ router.get('/polls/:id', function(req, res) {
   });
 });
 
+router.get('/polls/:id/results', function(req, res) {
+  models.Poll.findOne({
+    _id: req.params.id,
+    published: true
+  }).populate('_user').then(function(poll) {
+    if (!poll) return notFound(res, "Poll not found");
+    return res.status(200).json(poll.renderResults());
+  }).catch(function(err) {
+    if (err.name === 'CastError') return notFound(res, "Poll not found")
+    console.log(err.toString());
+    return internalError(res);
+  });
+});
+
 router.post('/polls/:id/vote', jsonParser, function(req, res) {
   models.Poll.findOne({
     _id: req.params.id,
@@ -209,7 +214,10 @@ router.post('/polls/:id/vote', jsonParser, function(req, res) {
   });
 });
 
-module.exports = app.listen(port, function() {
+server.on('request', app);
+module.exports = server.listen(port, function() {
   /* istanbul ignore if */
   if (config.environment !== 'test') console.log('Voting app listening on port ' + port + '!');
 });
+
+socket.createSocket(server);

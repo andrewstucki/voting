@@ -5,6 +5,20 @@ import { Doughnut } from 'react-chartjs'
 
 import { polls, flash } from '../actions'
 
+function shadeRGBColor(color, percent) {
+  const f = color.split(",")
+  const t = percent < 0 ? 0 : 255
+  const p = percent < 0 ? percent*-1 : percent
+  const R = parseInt(f[0].slice(4))
+  const G = parseInt(f[1])
+  const B = parseInt(f[2].slice(0, -1))
+  return `rgb(${Math.round((t-R)*p)+R},${Math.round((t-G)*p)+G},${Math.round((t-B)*p)+B})`
+}
+
+function dynamicColors(){
+  return `rgb(${Math.floor(Math.random()*220) + 12},${Math.floor(Math.random()*220) + 12},${Math.floor(Math.random()*220) + 12})`
+}
+
 export default class Poll extends Component {
   constructor(props) {
     super(props)
@@ -53,25 +67,17 @@ export default class Poll extends Component {
     )
   }
 
-  chartData() {
-    return [{
-      value: 300,
-      color:"#F7464A",
-      highlight: "#FF5A5E",
-      label: "Red"
-    },
-    {
-      value: 50,
-      color: "#46BFBD",
-      highlight: "#5AD3D1",
-      label: "Green"
-    },
-    {
-      value: 100,
-      color: "#FDB45C",
-      highlight: "#FFC870",
-      label: "Yellow"
-    }]
+  chart() {
+    const { answers } = this.props.results
+    if(answers) {
+      const data = Object.keys(answers).map(answer => {
+        const color = dynamicColors()
+        const highlight = shadeRGBColor(color, 0.05)
+        return {value: answers[answer], label: answer, color, highlight}
+      })
+      return <Doughnut data={data} width="600" height="250" />
+    }
+    return (<h1>N/A</h1>)
   }
 
   render() {
@@ -120,7 +126,7 @@ export default class Poll extends Component {
               </form>
             </div>
             <div className="col-lg-6 poll-results">
-              <Doughnut data={this.chartData()} width="600" height="250" />
+              {this.chart()}
             </div>
           </div>
           {this.shareButtons()}
@@ -140,6 +146,10 @@ Poll.propTypes = {
     published: PropTypes.bool,
     allowOther: PropTypes.bool,
     options: PropTypes.array
+  }).isRequired,
+  results: PropTypes.shape({
+    id: PropTypes.string,
+    answers: PropTypes.object
   }).isRequired
 }
 
