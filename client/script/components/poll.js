@@ -22,6 +22,7 @@ function dynamicColors(){
 export default class Poll extends Component {
   constructor(props) {
     super(props)
+    this.data = []
     this.doVote = this.doVote.bind(this)
   }
 
@@ -68,14 +69,32 @@ export default class Poll extends Component {
   }
 
   chart() {
+    const self = this
     const { answers } = this.props.results
     if(answers) {
       const data = Object.keys(answers).map(answer => {
         const color = dynamicColors()
         const highlight = shadeRGBColor(color, 0.05)
-        return {value: answers[answer], label: answer, color, highlight}
+        const entries = self.data.filter(entry => entry.label === answer)
+        if (entries.length == 0) {
+          const entry = {value: answers[answer], label: answer, color, highlight}
+          self.data.push(entry)
+          return entry
+        }
+        return Object.assign({}, entries[0], {value: answers[answer]})
       })
-      return <Doughnut data={data} width="600" height="250" />
+      const legendKeys = data.map((entry, i) => {
+        return <li key={i}><div style={{backgroundColor: entry.color}} className="legend-key"></div><label>{entry.label}</label></li>
+      })
+      return (
+        <div>
+          <h3>Responses: {data.map(entry => entry.value).reduce((sum, count) => sum + count)}</h3>
+          <Doughnut data={data} height="250" className="poll-data" />
+          <ul className="legend">
+            {legendKeys}
+          </ul>
+        </div>
+      )
     }
     return (<h1>N/A</h1>)
   }

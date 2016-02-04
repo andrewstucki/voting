@@ -35,7 +35,7 @@ export function vote(id, response) {
   return (dispatch, getState) => {
     dispatch({ type: Constants.VOTE_REQUEST })
     return api(`/polls/${id}/vote`, { method: "post" }, response)
-      .then(json => dispatch({ type: Constants.VOTE_SUCCESS, value: json }))
+      .then(json => dispatch({ type: Constants.VOTE_SUCCESS, value: json, id }))
       .catch(err => handleError(dispatch, Constants.VOTE_FAILURE, err))
   }
 }

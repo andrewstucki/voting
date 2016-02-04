@@ -24,7 +24,7 @@ function handleCache(state, entity, value) {
 }
 
 function session(state = { users: [], polls: [] }, action) {
-  const { type, entity, value } = action
+  const { type, entity, value, id } = action
   switch (type) {
   case constants.LOGOUT_SUCCESS:
     return { users: [], polls: [] }
@@ -33,6 +33,10 @@ function session(state = { users: [], polls: [] }, action) {
   case constants.ADMIN_POLLS_SUCCESS:
   case constants.ADMIN_UPDATE_POLL_SUCCESS:
     return handleCache(state, entity, value)
+  case constants.VOTE_SUCCESS:
+    let newPoll = {}
+    newPoll[id] = Object.assign({}, state.polls[id], { responses: state.polls[id].responses + 1 })
+    return Object.assign({}, state, { polls: Object.assign({}, state.polls, newPoll) })
   default:
     return state
   }
@@ -61,7 +65,7 @@ function auth(state = { isAuthenticated: false, user: {} }, action) {
 }
 
 function cache(state = { users: {}, polls: {}, results: {}, pollsLoaded: false, usersLoaded: false }, action) {
-  const { type, entity, value } = action
+  const { type, entity, value, id, count } = action
   switch(type) {
   case constants.POLL_SUCCESS:
   case constants.POLLS_SUCCESS:
@@ -70,12 +74,15 @@ function cache(state = { users: {}, polls: {}, results: {}, pollsLoaded: false, 
   case constants.RESULTS_SUCCESS:
     return handleCache(state, entity, value)
   case constants.VOTE_UPDATE:
-    const { id, count } = action
     let newCount = {}
     let mergeResult = {}
     newCount[value] = count
     mergeResult[id] = {id: id, answers: Object.assign({}, state.results[id].answers, newCount)}
     return Object.assign({}, state, { results: Object.assign({}, state.results, mergeResult) })
+  case constants.VOTE_SUCCESS:
+    let newPoll = {}
+    newPoll[id] = Object.assign({}, state.polls[id], { responses: state.polls[id].responses + 1 })
+    return Object.assign({}, state, { polls: Object.assign({}, state.polls, newPoll) })
   default:
     return state
   }

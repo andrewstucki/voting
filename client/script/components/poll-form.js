@@ -6,6 +6,7 @@ export default class PollForm extends Component {
   constructor(props) {
     super(props)
     this.doSubmit = this.doSubmit.bind(this)
+    this.doDelete = this.doDelete.bind(this)
     this.addOption = this.addOption.bind(this)
     this.changeOptionValue = this.changeOptionValue.bind(this)
     this.state = {
@@ -29,20 +30,24 @@ export default class PollForm extends Component {
     }
   }
 
-  doSubmit(evt) {
-    evt.preventDefault()
+  doSubmit(e) {
+    e.preventDefault()
     const name = document.getElementById("name").value
     const published = document.getElementById("published").checked
     const allowOther = document.getElementById("allow-other").checked
 
     //Do validation here
-    
+
     this.props.onSubmit({
       name,
       published,
       allowOther,
       options: this.state.options.filter(option => /\S/.test(option.value))
     })
+  }
+
+  doDelete(e) {
+    e.preventDefault()
   }
 
   changeOptionValue(index, value) {
@@ -60,6 +65,8 @@ export default class PollForm extends Component {
 
   render() {
     const options = this.state.options
+    let deleteButton = ""
+    if (this.props.poll.id) deleteButton = <button className="btn btn-block btn-danger" onClick={this.doDelete}>Delete</button>
     return (
       <div>
         <form name="poll-creation-form">
@@ -95,7 +102,8 @@ export default class PollForm extends Component {
           <button className="btn btn-block btn-primary" onClick={this.addOption}>Add Option</button>
           <hr />
           <div className="form-buttons">
-            <button className="btn btn-block btn-success" type="submit" onClick={this.doSubmit}>Submit</button>
+          <button className="btn btn-block btn-success" type="submit" onClick={this.doSubmit}>Submit</button>
+          {deleteButton}
           </div>
         </form>
       </div>

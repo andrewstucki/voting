@@ -317,6 +317,7 @@ pollSchema.methods.renderJson = function() {
     published: poll.published,
     allowOther: poll.allowOther,
     options: poll.options,
+    responses: _.values(poll.answers).reduce(function(sum, count) { return sum + count; }, 0)
   };
   return payload;
 };

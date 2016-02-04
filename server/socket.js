@@ -1,11 +1,13 @@
 var hat = require('hat');
 var WebSocketServer = require('websocket').server;
 
+var baseUrl = process.env.BASE_URL || "http://localhost:3000";
+
 var websocket;
 var subscriptions = {};
 var connections = {};
 var socketOriginAllowed = function(origin) {
-  return true;
+  return origin === baseUrl;
 };
 
 module.exports = {

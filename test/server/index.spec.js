@@ -146,6 +146,7 @@ describe('api routes', () => {
       allowOther: true,
       options: ['foo', 'bar', 'baz'],
       answers: { will: 'ignore' },
+      responses: 0,
       user: 'test1234',
       _user: 'test1234'
     }
