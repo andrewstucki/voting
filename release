@@ -18,7 +18,7 @@ git add package.json
 REVISION=v$(cat package.json | awk -v RS=',"' -F: '/"version"/ {print $2}' | sed -e 's/[ "]//g')
 git commit -m "Release ${REVISION}"
 
-git branch -D release-build
+git branch -D release-build 2> /dev/null
 git checkout -b release-build
 grunt release
 git add public -f
