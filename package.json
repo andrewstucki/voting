@@ -1,6 +1,6 @@
 {
   "name": "voting",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "voting app",
   "main": "server/index.js",
   "scripts": {
