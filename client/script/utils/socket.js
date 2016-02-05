@@ -19,7 +19,6 @@ export default class Socket {
   }
 
   handleMessage(data) {
-    console.log(data)
     switch (data.type) {
     case 'update':
       if (this.subscriptions.indexOf(data.id) === -1) return

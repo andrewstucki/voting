@@ -44,8 +44,8 @@ class User extends Component {
         <div className="col-lg-3 user-profile">
           <img src={gravatarUrl + "?s=200&d=mm"} className='user-avatar' />
           <div className="user-contact">
-            <h2 className="user-full-name">{ name || username }</h2>
-            <h2 className="user-username">{ username }</h2>
+            <h2 className="user-full-name">{ username }</h2>
+            <h2 className="user-username">{ name || '' }</h2>
           </div>
         </div>
         <div className="col-lg-9">

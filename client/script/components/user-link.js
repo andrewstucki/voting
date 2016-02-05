@@ -11,7 +11,7 @@ export default class UserLink extends Component {
           <img className="icon-thumbnail user-avatar" src={gravatarUrl + "?s=50&d=mm"} />
           <div className="user-item">
             <h4 className="list-group-item-heading">{username}</h4>
-            <p className="list-group-item-text">{name}</p>
+            <p className="list-group-item-text">{name || ''}</p>
           </div>
         </div>
       </Link>

@@ -13,7 +13,7 @@ class AdminEditPage extends Component {
   }
 
   submitForm(poll) {
-    console.log(poll)
+    this.props.updatePoll(poll)
   }
 
   deletePoll() {
@@ -40,5 +40,6 @@ function mapStateToProps(state) {
 
 export default connect(mapStateToProps, {
   loadPoll: admin.loadPoll,
-  deletePoll: admin.deletePoll
+  deletePoll: admin.deletePoll,
+  updatePoll: admin.updatePoll
 })(AdminEditPage)

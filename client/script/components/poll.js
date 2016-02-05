@@ -26,17 +26,17 @@ export default class Poll extends Component {
     this.doVote = this.doVote.bind(this)
   }
 
-  // componentWillMount(props) {
-  //   if (props && (props.poll !== this.props.poll)) {
-  //     this.forceUpdate()
-  //   }
-  // }
+  componentWillMount(props) {
+    if (props && (props.poll !== this.props.poll)) {
+      this.forceUpdate()
+    }
+  }
 
-  // componentWillReceiveProps(props) {
-  //   if (props && (props.poll !== this.props.poll)) {
-  //     this.forceUpdate()
-  //   }
-  // }
+  componentWillReceiveProps(props) {
+    if (props && (props.poll !== this.props.poll)) {
+      this.forceUpdate()
+    }
+  }
 
   doVote(e) {
     e.preventDefault()

@@ -88,6 +88,9 @@ function cache(state = { users: {}, polls: {}, results: {}, pollsLoaded: false, 
   case constants.POLL_REMOVE:
   case constants.USER_REMOVE:
     return removeCache(state, entity, value)
+  case constants.ADMIN_UPDATE_POLL_SUCCESS:
+    if (value.published) return handleCache(state, entity, value)
+    return state
   case constants.VOTE_UPDATE:
     let newCount = {}
     let mergeResult = {}

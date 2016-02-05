@@ -110,7 +110,10 @@ userSchema.statics.signup = function(username, name, email, password, confirmati
       if (!skipEmail) return user.sendConfirmation().then(resolve.bind(this, user)).catch(reject);
       return resolve(user);
     }).catch(function(err) {
-      if (err.code === 11000) return reject(new errors.ModelInvalid(err.toString()));
+      if (err.code === 11000) {
+        if (/email/.test(err.errmsg)) return reject(new errors.ModelInvalid('Email address already taken!'));
+        if (/username/.test(err.errmsg)) return reject(new errors.ModelInvalid('Username already taken!'));
+      }
       return reject(new errors.DatabaseFailure(err.toString()));
     });
   });
@@ -247,6 +250,7 @@ userSchema.methods.updatePoll = function(id, data) {
       var published = poll.published;
 
       if (data.name) poll.name = data.name;
+      if (data.description) poll.description = data.description;
       if (data.hasOwnProperty('allowOther')) poll.allowOther = data.allowOther;
       if (data.hasOwnProperty('published')) poll.published = data.published;
       if (data.hasOwnProperty('options')) poll.options = data.options.map(function(option) { return option.trim(); });

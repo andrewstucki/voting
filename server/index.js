@@ -147,7 +147,7 @@ router.get('/admin/polls/:id', middleware.authenticate, function(req, res) {
   }).catch(handleError.bind(this, res));
 });
 
-router.patch('/admin/polls/:id', jsonParser, middleware.authenticate, function(req, res) {
+router.put('/admin/polls/:id', jsonParser, middleware.authenticate, function(req, res) {
   req.user.updatePoll(req.params.id, req.body).then(function(poll) {
     return res.status(200).json(poll.renderJson());
   }).catch(handleError.bind(this, res));

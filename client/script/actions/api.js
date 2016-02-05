@@ -27,7 +27,6 @@ export function api(endpoint, userParams = {}, body = null) {
     payload = Object.assign(payload, {body: JSON.stringify(body)})
   }
   return fetch(fullUrl, payload).then(response => {
-    console.log(response)
     if (response.status >= 400) {
       throw response;
     }

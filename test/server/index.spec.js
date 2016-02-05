@@ -262,11 +262,11 @@ describe('api routes', () => {
       }).catch(done)
     })
 
-    it('404s on patch polls/:id for polls owned by another user', done => {
+    it('404s on put polls/:id for polls owned by another user', done => {
       Factory.create('poll', (err, poll) => {
         if (err) return done(err)
         request(server)
-          .patch(`/api/v1/admin/polls/${poll._id}`)
+          .put(`/api/v1/admin/polls/${poll._id}`)
           .set('X-Voting-Session', admin.sessionToken)
           .send(params)
           .expect('Content-Type', /json/)
@@ -274,13 +274,13 @@ describe('api routes', () => {
       })
     })
 
-    it('updates the poll on patch polls/:id for polls owned by the user', done => {
+    it('updates the poll on put polls/:id for polls owned by the user', done => {
       Factory.create('poll', { _user: admin }, (err, poll) => {
         if (err) return done(err)
         Poll.find({}).then(polls => {
           assert.equal(polls.length, 1)
           request(server)
-            .patch(`/api/v1/admin/polls/${poll._id}`)
+            .put(`/api/v1/admin/polls/${poll._id}`)
             .set('X-Voting-Session', admin.sessionToken)
             .send(params)
             .expect('Content-Type', /json/)
@@ -332,9 +332,9 @@ describe('api routes', () => {
         .expect(401, done);
     })
 
-    it('patch admin/polls/:id responds with a 401', (done) => {
+    it('put admin/polls/:id responds with a 401', (done) => {
       request(server)
-        .patch('/api/v1/admin/polls/1')
+        .put('/api/v1/admin/polls/1')
         .expect('Content-Type', /json/)
         .expect(401, done);
     })

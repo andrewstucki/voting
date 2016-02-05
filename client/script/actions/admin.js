@@ -4,7 +4,7 @@ import { api, handleError } from './api'
 export function updatePoll(poll) {
   return (dispatch, getState) => {
     dispatch({ type: Constants.ADMIN_UPDATE_POLL_REQUEST })
-    return api(`/admin/polls/${poll.id}`, { method: "patch", authentication: getState().auth.user.token }, poll)
+    return api(`/admin/polls/${poll.id}`, { method: "put", authentication: getState().auth.user.token }, poll)
       .then(json => dispatch({ type: Constants.ADMIN_UPDATE_POLL_SUCCESS, entity: 'polls', value: json }))
       .catch(err => handleError(dispatch, Constants.ADMIN_UPDATE_POLL_FAILURE, err))
   }
