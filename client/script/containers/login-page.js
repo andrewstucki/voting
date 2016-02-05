@@ -33,6 +33,9 @@ class LoginPage extends Component {
             <label htmlFor="password">Enter your password.</label>
             <input className="form-control" id="password" name="password" placeholder="********" type="password" required />
           </div>
+          <div className="form-buttons">
+            <button className="btn btn-block btn-success" type="submit" onClick={this.doLogin}>Submit</button>
+          </div>
         </form>
       </div>
     )
