@@ -25,7 +25,6 @@ git add public -f
 git commit -m "${REVISION} Assets"
 git tag -fa $REVISION -m "Tagging ${REVISION}"
 git tag -fa release -m "Release tag -> ${REVISION}"
-git push heroku :master
-git push heroku HEAD:master
+git push heroku +HEAD:master
 git checkout master
 git branch -D release-build
