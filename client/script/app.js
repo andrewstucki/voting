@@ -8,6 +8,7 @@ import configureStore from './store/configureStore'
 import { api } from './actions'
 import Socket from './utils/socket'
 
+if (process.env.NODE_ENV === 'production' && window.location.protocol !== "https:") window.location.href = `https:${window.location.href.substring(window.location.protocol.length)}`
 if (process.env.NODE_ENV !== 'production') document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js"></' + 'script>')
 
 function initializeApplication(user) {

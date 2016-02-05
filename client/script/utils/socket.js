@@ -4,7 +4,8 @@ import { constants, polls, users } from '../actions'
 
 export default class Socket {
   constructor(url, store) {
-    this.websocket = new WebSocket(`ws://${url}`, 'voting')
+    const socketProtocol = window.location.protocol === "https:" ? 'wss' : 'ws'
+    this.websocket = new WebSocket(`${socketProtocol}://${url}`, 'voting')
     this.store = store
     this.store.subscribe(this.storeUpdate.bind(this))
     this.subscriptions = []
