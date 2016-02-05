@@ -11,6 +11,11 @@ var config = {
   test: {
     db: "mongodb://localhost/voting-test",
     port: 3000
+  },
+
+  production: {
+    db: process.env.MONGOLAB_URI,
+    port: process.env.PORT
   }
 };
 
