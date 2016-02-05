@@ -119,7 +119,7 @@ router.post("/confirm/resend", middleware.authenticate, function(req, res) {
 
 router.post("/signup", jsonParser, function(req, res) {
   if (!req.body) return invalid(res);
-  models.User.signup(req.body.email, req.body.password, req.body.confirmation).then(function(user) {
+  models.User.signup(req.body.username, req.body.name, req.body.email, req.body.password, req.body.confirmation).then(function(user) {
     return res.status(201).json({
       message: "Confirmation message sent to: " + user.email
     });

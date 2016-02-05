@@ -1,7 +1,8 @@
 var config = {
   src: "client",
   dest: "public",
-  bower: "bower_components"
+  bower: "bower_components",
+  npm: "node_modules"
 };
 
 module.exports = function(grunt) {

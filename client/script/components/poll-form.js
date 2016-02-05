@@ -48,6 +48,7 @@ export default class PollForm extends Component {
 
   doDelete(e) {
     e.preventDefault()
+    if (this.props.onDelete) this.props.onDelete()
   }
 
   changeOptionValue(index, value) {
@@ -76,18 +77,18 @@ export default class PollForm extends Component {
               <input className="form-control" id="name" name="name" placeholder="My Awesome Poll" value={this.props.poll.name} required />
             </div>
           </div>
-          <div class="form-group">
-            <div class="col-lg-offset-3 col-lg-9">
-              <div class="checkbox">
+          <div className="form-group">
+            <div className="col-lg-offset-3 col-lg-9">
+              <div className="checkbox">
                 <label>
                   <input type="checkbox" id="published" name="published" defaultChecked checked={this.props.poll.published} /> Published?
                 </label>
               </div>
             </div>
           </div>
-          <div class="form-group">
-            <div class="col-lg-offset-3 col-lg-9">
-              <div class="checkbox">
+          <div className="form-group">
+            <div className="col-lg-offset-3 col-lg-9">
+              <div className="checkbox">
                 <label>
                   <input type="checkbox" id="allow-other" name="allow-other" defaultChecked checked={this.props.poll.allowOther} /> Allow Additional Fill-in "Other" Response?
                 </label>
@@ -120,5 +121,6 @@ PollForm.propTypes = {
     allowOther: PropTypes.bool,
     options: PropTypes.array
   }).isRequired,
-  onSubmit: PropTypes.func.isRequired
+  onSubmit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func
 }

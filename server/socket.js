@@ -1,5 +1,6 @@
 var hat = require('hat');
 var WebSocketServer = require('websocket').server;
+var _ = require('underscore');
 
 var baseUrl = process.env.BASE_URL || "http://localhost:3000";
 
@@ -24,6 +25,28 @@ module.exports = {
     }
   },
 
+  addRecord: function(record, type) {
+    if (!websocket) return;
+    _.values(connections).forEach(function(connection) {
+      connection.sendUTF(JSON.stringify({
+        type: 'add',
+        entity: type,
+        record
+      }));
+    });
+  },
+
+  removeRecord: function(id, type) {
+    if (!websocket) return;
+    _.values(connections).forEach(function(connection) {
+      connection.sendUTF(JSON.stringify({
+        type: 'remove',
+        entity: type,
+        id
+      }));
+    });
+  },
+
   createSocket: function(app) {
     if (!!websocket) return;
 
@@ -38,10 +61,7 @@ module.exports = {
       var connection = request.accept('voting', request.origin);
       var id = hat();
       connections[id] = connection;
-      console.log(connection.remoteAddress + " connected - Protocol Version " + connection.webSocketVersion);
-
       connection.on('close', function() {
-        console.log(connection.remoteAddress + "; " + id + " disconnected");
         delete connections[id]
         for (var subscription in subscriptions) {
           var index = subscriptions[subscription].indexOf(id);
@@ -55,7 +75,6 @@ module.exports = {
             var command = JSON.parse(message.utf8Data);
 
             if (command.type === 'subscribe') {
-              console.log('subscribe: ' + command.id)
               subscriptions[command.id] = subscriptions[command.id] || [];
               if (subscriptions[command.id].indexOf(id) === -1) subscriptions[command.id].push(id);
             }

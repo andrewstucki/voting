@@ -19,7 +19,7 @@ export default class PollLink extends Component {
 PollLink.propTypes = {
   poll: PropTypes.shape({
     id: PropTypes.string.isRequired,
-    user: PropTypes.string.isRequired,
+    user: PropTypes.object.isRequired,
     name: PropTypes.string.isRequired,
     published: PropTypes.bool.isRequired,
     allowOther: PropTypes.bool.isRequired,

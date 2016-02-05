@@ -10,19 +10,31 @@ export function updatePoll(poll) {
   }
 }
 
+export function deletePoll(id, callback) {
+  return (dispatch, getState) => {
+    dispatch({ type: Constants.ADMIN_DELETE_POLL_REQUEST })
+    return api(`/admin/polls/${id}`, { method: "delete", authentication: getState().auth.user.token })
+      .then(json => {
+        dispatch({ type: Constants.ADMIN_DELETE_POLL_SUCCESS, entity: 'polls', value: id })
+        if (callback) callback()
+      })
+      .catch(err => handleError(dispatch, Constants.ADMIN_DELETE_POLL_FAILURE, err))
+  }
+}
+
 export function createPoll(poll, callback) {
   return (dispatch, getState) => {
     dispatch({ type: Constants.ADMIN_CREATE_POLL_REQUEST })
     return api('/admin/polls', { method: "post", authentication: getState().auth.user.token }, poll)
       .then(json => {
         dispatch({ type: Constants.ADMIN_CREATE_POLL_SUCCESS, entity: 'polls', value: json })
-        callback(json)
+        if (callback) callback(json)
       })
       .catch(err => handleError(dispatch, Constants.ADMIN_CREATE_POLL_FAILURE, err))
   }
 }
 
-export function fetchPoll(id) {
+export function loadPoll(id) {
   return (dispatch, getState) => {
     if (getState().session.polls[id]) return null
     dispatch({ type: Constants.ADMIN_POLL_REQUEST })

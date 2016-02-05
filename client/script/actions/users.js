@@ -20,3 +20,11 @@ export function loadAll(forceUpdate = false) {
       .catch(err => handleError(dispatch, Constants.USERS_FAILURE, err))
   }
 }
+
+export function add(record) {
+  return { type: Constants.USER_ADD, entity: 'users', value: record }
+}
+
+export function remove(id) {
+  return { type: Constants.USER_REMOVE, entity: 'users', value: id }
+}

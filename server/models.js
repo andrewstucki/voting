@@ -17,6 +17,14 @@ mongoose.connect(process.env.MONGOLAB_URI || config.db);
 
 // Users
 var userSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  name: {
+    type: String
+  },
   email: {
     type: String,
     required: true,
@@ -36,24 +44,73 @@ var userSchema = new mongoose.Schema({
   gravatarUrl: String
 });
 
-userSchema.statics.signup = function(email, password, passwordConfirmation, skipEmail) {
+
+var userValidators = {
+  email: function(email) {
+    return {
+      valid: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email),
+      message: "Invalid email address."
+    }
+  },
+  username: function(username) {
+    return {
+      valid: /^[A-Za-z0-9]{5,15}$/.test(username),
+      message: "Username must be between 5 and 15 characters and may only contain lower case letters, upper case letters, and numbers."
+    }
+  },
+  password: function(password) {
+    return {
+      valid: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/.test(password),
+      message: "Password must be at least 8 characters and must include at least one upper case letter, one lower case letter, and one number."
+    }
+  },
+  confirmation: function(confirmation, password) {
+    return {
+     valid: confirmation !== '' && password === confirmation,
+     message: "Confirmation must not be empty and must match password."
+    }
+  }
+};
+
+var userValidation = function(fields) {
+  var usernameValidation;
+  var emailValidation;
+  var passwordValidation;
+  var confirmationValidation;
+
+  if (fields.username) usernameValidation = userValidators.username(fields.username);
+  if (fields.email) emailValidation = userValidators.email(fields.email);
+  if (fields.password) passwordValidation = userValidators.password(fields.password);
+  if (fields.confirmation && fields.password) confirmationValidation = userValidators.confirmation(fields.password, fields.confirmation);
+
+  var errors = []
+  if (usernameValidation && !usernameValidation.valid) errors.push(usernameValidation.message);
+  if (emailValidation && !emailValidation.valid) errors.push(emailValidation.message);
+  if (passwordValidation && !passwordValidation.valid) errors.push(passwordValidation.message);
+  if (confirmationValidation && !confirmationValidation.valid) errors.push(confirmationValidation.message);
+
+  return errors;
+};
+
+userSchema.statics.signup = function(username, name, email, password, confirmation, skipEmail) {
   var schema = this;
   return new promise(function(resolve, reject) {
-    if (password !== passwordConfirmation)
-      return reject(new errors.ModelInvalid("Password confirmation does not match"));
-    if (!validator.isEmail(email))
-      return reject(new errors.ModelInvalid("Invalid Email Address"));
+    var validationErrors = userValidation({username, email, password, confirmation});
+    if (validationErrors.length !== 0) return reject(new errors.ModelInvalid(validationErrors.join("; ")));
     var params = {
+      username: username,
       email: email,
       password: password,
       confirmed: !!skipEmail
     };
+    if (name) params.name = name;
     var user = new schema(params);
     user.save().then(function(user) {
+      socket.addRecord(user.renderJson(), 'users');
       if (!skipEmail) return user.sendConfirmation().then(resolve.bind(this, user)).catch(reject);
       return resolve(user);
     }).catch(function(err) {
-      if (err.code === 11000) return reject(new errors.ModelInvalid("Email Address Already Taken"));
+      if (err.code === 11000) return reject(new errors.ModelInvalid(err.toString()));
       return reject(new errors.DatabaseFailure(err.toString()));
     });
   });
@@ -133,13 +190,17 @@ userSchema.methods.createPoll = function(data) {
     published: !!data.published,
     allowOther: !!data.allowOther,
     name: data.name,
-    options: data.options || [],
+    description: data.description,
+    options: data.options.map(function(option) { return option.trim(); }) || [],
     answers: {},
     _user: this._id
   });
   return new promise(function(resolve, reject){
+    var validationErrors = pollValidation({name: poll.name, options: poll.options});
+    if (validationErrors.length !== 0) return reject(new errors.ModelInvalid(validationErrors.join("; ")))
     return poll.save().then(function(poll) {
       poll._user = user;
+      if (poll.published) socket.addRecord(poll.renderJson(), 'polls');
       resolve(poll)
     }).catch(function(err){
       if (err.code === 11000) return reject(new errors.ModelInvalid("Invalid Poll"));
@@ -182,11 +243,21 @@ userSchema.methods.updatePoll = function(id, data) {
       _id: id
     }).populate('_user').then(function(poll) {
       if (!poll) return reject(new errors.NotFound("Poll not found"));
+
+      var published = poll.published;
+
       if (data.name) poll.name = data.name;
       if (data.hasOwnProperty('allowOther')) poll.allowOther = data.allowOther;
       if (data.hasOwnProperty('published')) poll.published = data.published;
-      if (data.hasOwnProperty('options')) poll.options = data.options;
-      return poll.save().then(resolve).catch(function(err) {
+      if (data.hasOwnProperty('options')) poll.options = data.options.map(function(option) { return option.trim(); });
+
+      var validationErrors = pollValidation({name: poll.name, options: poll.options});
+      if (validationErrors.length !== 0) return reject(new errors.ModelInvalid(validationErrors.join("; ")))
+
+      return poll.save().then(function(updated) {
+        resolve(updated);
+        if (updated.published !== published) updated.published ? socket.addRecord(poll.renderJson(), 'polls') : socket.removeRecord(id, 'polls');
+      }).catch(function(err) {
         if (err.code === 11000) return reject(new errors.ModelInvalid("Invalid Poll"));
         return reject(new errors.DatabaseFailure(err.toString()));
       });
@@ -204,6 +275,7 @@ userSchema.methods.deletePoll = function(id) {
       _id: id
     }).then(function(response) {
       if (!response.result || response.result.n !== 1) return reject(new errors.NotFound("Poll not found"));
+      socket.removeRecord(id, 'polls');
       return resolve(response);
     }).catch(function(err) {
       return reject(new errors.DatabaseFailure(err.toString()));
@@ -214,16 +286,19 @@ userSchema.methods.deletePoll = function(id) {
 userSchema.methods.renderToken = function() {
   return {
     id: this._id,
+    username: this.username,
+    name: this.name,
+    gravatarUrl: this.gravatarUrl,
     email: this.email,
-    token: this.sessionToken,
-    gravatarUrl: this.gravatarUrl
+    token: this.sessionToken
   };
 };
 
 userSchema.methods.renderJson = function() {
   return {
     id: this._id,
-    email: this.email,
+    username: this.username,
+    name: this.name,
     gravatarUrl: this.gravatarUrl
   };
 };
@@ -249,6 +324,35 @@ userSchema.pre('save', function(next) {
 
 // Polls
 
+var pollValidators = {
+  name: function(name) {
+    return {
+      valid: /\S/.test(name),
+      message: "Name cannot be blank."
+    }
+  },
+  options: function(options) {
+    return {
+     valid: options.length > 1 && options.reduce(function(valid, value){ return valid && /\S/.test(value); }, true),
+     message: "Options cannot be blank and must have more than 2 values."
+    }
+  }
+};
+
+var pollValidation = function(fields) {
+  var nameValidation;
+  var optionsValidation;
+
+  if (fields.name) nameValidation = pollValidators.name(fields.name);
+  if (fields.options) optionsValidation = pollValidators.options(fields.options);
+
+  var errors = []
+  if (nameValidation && !nameValidation.valid) errors.push(nameValidation.message);
+  if (optionsValidation && !optionsValidation.valid) errors.push(optionsValidation.message);
+
+  return errors;
+};
+
 var pollSchema = new mongoose.Schema({
   _user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -257,6 +361,9 @@ var pollSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
+  },
+  description: {
+    type: String
   },
   published: {
     type: Boolean,
@@ -285,11 +392,11 @@ pollSchema.methods.vote = function(response) {
   var poll = this;
   return new promise(function(resolve, reject) {
     var option = _.find(poll.options, function(option) {
-      return option === response;
+      return option.toLowerCase() === response.trim().toLowerCase();
     });
     var value;
     if (option) value = option;
-    else if (!option && poll.allowOther) value = response;
+    else if (!option && poll.allowOther) value = response.trim();
     else return reject(new errors.ModelInvalid("Invalid Option"));
     poll.answers = poll.answers || {};
     poll.answers[value] = poll.answers[value] || 0;
@@ -311,9 +418,10 @@ pollSchema.methods.renderJson = function() {
     id: poll._id,
     user: {
       id: poll._user.id,
-      email: poll._user.email
+      username: poll._user.username
     },
     name: poll.name,
+    description: poll.description,
     published: poll.published,
     allowOther: poll.allowOther,
     options: poll.options,

@@ -1,6 +1,6 @@
 import difference from 'lodash/array/difference'
 
-import { update } from '../actions/polls'
+import { constants, polls, users } from '../actions'
 
 export default class Socket {
   constructor(url, store) {
@@ -19,11 +19,26 @@ export default class Socket {
   }
 
   handleMessage(data) {
-    console.log(data);
-    console.log(data.type, data.id, this.subscriptions)
-    if (data.type !== 'update' || this.subscriptions.indexOf(data.id) === -1) return
-    console.log('blah')
-    return this.store.dispatch(update(data.id, data.value, data.count))
+    console.log(data)
+    switch (data.type) {
+    case 'update':
+      if (this.subscriptions.indexOf(data.id) === -1) return
+      return this.store.dispatch(polls.update(data.id, data.value, data.count))
+    case 'add':
+      switch(data.entity) {
+        case 'polls':
+          return this.store.dispatch(polls.add(data.record))
+        case 'users':
+          return this.store.dispatch(users.add(data.record))
+      }
+    case 'remove':
+      switch(data.entity) {
+        case 'polls':
+          return this.store.dispatch(polls.remove(data.id))
+        case 'users':
+          return this.store.dispatch(polls.remove(data.id))
+      }
+    }
   }
 
   storeUpdate() {

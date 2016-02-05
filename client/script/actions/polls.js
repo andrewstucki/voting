@@ -47,3 +47,11 @@ export function subscribe(id) {
 export function update(id, value, count) {
   return { type: Constants.VOTE_UPDATE, id, value, count }
 }
+
+export function add(record) {
+  return { type: Constants.POLL_ADD, entity: 'polls', value: record }
+}
+
+export function remove(id) {
+  return { type: Constants.POLL_REMOVE, entity: 'polls', value: id }
+}

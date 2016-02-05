@@ -23,13 +23,11 @@ class User extends Component {
   }
 
   render() {
-    const { id, email, gravatarUrl } = this.props.user
-
-    console.log(this.props.polls)
-
+    const { id, username, name, gravatarUrl } = this.props.user
+    const { pollLink } = this.props
     let polls = this.props.polls.map(poll => {
       return (
-        <PollLink link="polls" poll={poll} key={poll.id} />
+        <PollLink link={pollLink || 'polls'} poll={poll} key={poll.id} />
       )
     })
 
@@ -46,8 +44,8 @@ class User extends Component {
         <div className="col-lg-3 user-profile">
           <img src={gravatarUrl + "?s=200&d=mm"} className='user-avatar' />
           <div className="user-contact">
-            <h2 className="user-full-name">{ email }</h2>
-            <h2 className="user-username">{ email }</h2>
+            <h2 className="user-full-name">{ name || username }</h2>
+            <h2 className="user-username">{ username }</h2>
           </div>
         </div>
         <div className="col-lg-9">
@@ -67,10 +65,12 @@ class User extends Component {
 User.propTypes = {
   user: PropTypes.shape({
     id: PropTypes.string,
-    email: PropTypes.string,
+    name: PropTypes.string,
+    username: PropTypes.string,
     gravatarUrl: PropTypes.string
   }).isRequired,
   polls: PropTypes.array.isRequired,
+  pollLink: PropTypes.string
 }
 
 export default connect(null, {

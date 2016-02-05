@@ -26,17 +26,17 @@ export default class Poll extends Component {
     this.doVote = this.doVote.bind(this)
   }
 
-  componentWillMount(props) {
-    if (props && (props.poll !== this.props.poll)) {
-      this.forceUpdate()
-    }
-  }
+  // componentWillMount(props) {
+  //   if (props && (props.poll !== this.props.poll)) {
+  //     this.forceUpdate()
+  //   }
+  // }
 
-  componentWillReceiveProps(props) {
-    if (props && (props.poll !== this.props.poll)) {
-      this.forceUpdate()
-    }
-  }
+  // componentWillReceiveProps(props) {
+  //   if (props && (props.poll !== this.props.poll)) {
+  //     this.forceUpdate()
+  //   }
+  // }
 
   doVote(e) {
     e.preventDefault()
@@ -101,7 +101,7 @@ export default class Poll extends Component {
 
   render() {
     const { id, name, allowOther, options, user } = this.props.poll
-    const { email: user_email, id: user_id } = user || {}
+    const { id: user_id, username } = user || {}
 
     let otherNode = ''
     if (allowOther) {
@@ -130,7 +130,7 @@ export default class Poll extends Component {
         <div className="col-lg-12">
           <div className="poll-header">
             <h2>{name}</h2>
-            Created by: <Link to={`/users/${user_id}`}>{user_email}</Link>
+            Created by: <Link to={`/users/${user_id}`}>{username}</Link>
           </div>
           <div className="row poll-form">
             <div className="col-lg-6">
@@ -158,7 +158,7 @@ Poll.propTypes = {
   poll: PropTypes.shape({
     id: PropTypes.string,
     user: PropTypes.shape({
-      email: PropTypes.string,
+      username: PropTypes.string,
       id: PropTypes.string
     }),
     name: PropTypes.string,

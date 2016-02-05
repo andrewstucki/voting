@@ -63,7 +63,7 @@ describe('api models', () => {
 
     describe('signup', () => {
       it('validates email addresses', done => {
-        User.signup('test', 'test', 'test', true).then(() => {
+        User.signup('username', 'Hello World', 'test', 'testTest1234', 'testTest1234', true).then(() => {
           done(new Error('unreachable'))
         }).catch(err => {
           assert(err instanceof ModelInvalid, "Invalid email did not throw a ModelInvalid")
@@ -72,7 +72,7 @@ describe('api models', () => {
       })
 
       it('ensures password and confirmation match', done => {
-        User.signup('test@test.com', 'test', 'other', true).then(() => {
+        User.signup('username', 'Hello World', 'test@test.com', 'testTest1234', 'other', true).then(() => {
           done(new Error('unreachable'))
         }).catch(err => {
           assert(err instanceof ModelInvalid, "Password/Confirmation mismatch did not throw a ModelInvalid")
@@ -81,7 +81,7 @@ describe('api models', () => {
       })
 
       it('creates a new record when nothing is wrong with email or password', done => {
-        User.signup('test@test.com', 'test', 'test', true).then(user => {
+        User.signup('username', 'Hello World', 'test@test.com', 'testTest1234', 'testTest1234', true).then(user => {
           assert(user._id instanceof mongoose.Types.ObjectId, "Id is not an ObjectId")
           assert.strictEqual(user.email, 'test@test.com')
           assert(typeof user.password === 'string', "Password is not a String")
@@ -92,7 +92,7 @@ describe('api models', () => {
 
       it('sends an email for confirming users', done => {
         assert.equal(queue.testMode.jobs.length, 0)
-        User.signup('test@test.com', 'test', 'test').then(() => {
+        User.signup('username', 'Hello World', 'test@test.com', 'testTest1234', 'testTest1234').then(() => {
           assert.equal(queue.testMode.jobs.length, 1)
           assert.equal(queue.testMode.jobs[0].type, 'email')
           done()

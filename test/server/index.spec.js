@@ -142,6 +142,7 @@ describe('api routes', () => {
     let admin
     const params = {
       name: 'My New Poll',
+      description: 'This is a description',
       published: false,
       allowOther: true,
       options: ['foo', 'bar', 'baz'],
@@ -247,7 +248,7 @@ describe('api routes', () => {
           .expect('Content-Type', /json/)
           .expect(payload => {
             assert(payload.body.hasOwnProperty('id') && typeof payload.body.id == 'string', 'Id missing from payload')
-            assert(payload.body.user.email === admin.email, 'User missing from payload')
+            assert(payload.body.user.username === admin.username, 'User missing from payload')
             const expected = _.omit(params, ['_user', 'user', 'answers'])
             const actual = _.omit(payload.body, ['user', 'answers', 'id'])
             assert(_.isEqual(actual, expected), 'Payload does not match')
@@ -285,7 +286,7 @@ describe('api routes', () => {
             .expect('Content-Type', /json/)
             .expect(payload => {
               assert(payload.body.hasOwnProperty('id') && typeof payload.body.id == 'string', 'Id missing from payload')
-              assert(payload.body.user.email === admin.email, 'User missing from payload')
+              assert(payload.body.user.username === admin.username, 'User missing from payload')
               const expected = _.omit(params, ['_user', 'user', 'answers'])
               const actual = _.omit(payload.body, ['user', 'answers', 'id'])
               assert(_.isEqual(actual, expected), 'Payload does not match')

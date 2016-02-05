@@ -16,9 +16,9 @@ class AdminProfilePage extends Component {
   }
 
   render() {
-    const { email } = this.props.user
+    const { name, username, email } = this.props.user
     return (
-      <User user={this.props.user} polls={this.props.polls}>
+      <User user={this.props.user} polls={this.props.polls} pollLink="edit" >
         <div className="panel panel-default">
           <div className="panel-heading"><h4>User Settings</h4></div>
           <div className="list-group">
@@ -27,13 +27,13 @@ class AdminProfilePage extends Component {
                 <div className="form-group">
                   <label className="col-sm-3 control-label" htmlFor="name">Name</label>
                   <div className="col-sm-9">
-                    <input className="form-control" id="name" name="name" type="text" placeholder="John Smith" />
+                    <input className="form-control" id="name" name="name" type="text" placeholder="John Smith" value={name} />
                   </div>
                 </div>
                 <div className="form-group">
                   <label className="col-sm-3 control-label" htmlFor="username">Username</label>
                   <div className="col-sm-9">
-                    <input className="form-control" id="username" name="username" type="text" placeholder="johnsmith" />
+                    <input className="form-control" id="username" name="username" type="text" placeholder="johnsmith" value={username} />
                   </div>
                 </div>
                 <div className="form-group">

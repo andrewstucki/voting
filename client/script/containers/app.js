@@ -104,7 +104,7 @@ class App extends Component {
     return (
       <ul className="nav navbar-nav navbar-right">
         <li>
-          <p className="navbar-text">Hello <Link to='/profile'>{this.props.currentUser.email}</Link></p>
+          <p className="navbar-text">Hello <Link to='/profile'>{this.props.currentUser.username}</Link></p>
         </li>
         <li>
           <a href="#" onClick={this.doLogout}>Log Out</a>

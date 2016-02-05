@@ -19,10 +19,10 @@ export function logout() {
   }
 }
 
-export function signup(email, password, confirmation) {
+export function signup(username, name, email, password, confirmation) {
   return (dispatch, getState) => {
     dispatch({ type: Constants.SIGNUP_REQUEST })
-    return api('/signup', { method: "post" }, { email, password, confirmation })
+    return api('/signup', { method: "post" }, { username, name, email, password, confirmation })
       .then(json => dispatch({ type: Constants.SIGNUP_SUCCESS, value: json }))
       .catch(err => handleError(dispatch, Constants.SIGNUP_FAILURE, err))
   }
